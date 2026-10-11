@@ -43,7 +43,7 @@ List<Color> heroGradient(Sky s, {required bool night}) {
 
 /// 아이콘 하나. animate 가 꺼져 있거나 '동작 줄이기' 설정이면 멈춘 한 장면.
 class WeatherIcon extends StatelessWidget {
-  const WeatherIcon(this.sky, {super.key, this.night = false, this.size = 28, this.animate = false});
+  const WeatherIcon(this.sky, {super.key, this.night = false, this.size = 28, this.animate = true});
   final Sky sky;
   final bool night;
   final double size;

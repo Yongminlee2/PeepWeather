@@ -408,16 +408,19 @@ class _Hours extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
                 child: Column(children: [
-                  Container(
+                  // 바닥선 위로 비 예보 기관 비율만큼 파란 막대가 올라온다
+                  SizedBox(
                     height: 26,
-                    alignment: Alignment.bottomCenter,
-                    decoration: BoxDecoration(border: Border.all(color: w.line), borderRadius: BorderRadius.circular(4)),
-                    child: FractionallySizedBox(
-                      heightFactor: sp[i] == null || sp[i]!.count == 0 ? 0 : sp[i]!.wet / sp[i]!.count,
-                      widthFactor: 1,
-                      child: DecoratedBox(
-                          decoration: BoxDecoration(color: w.rain, borderRadius: BorderRadius.circular(4))),
-                    ),
+                    child: Stack(alignment: Alignment.bottomCenter, children: [
+                      Container(height: 2, color: w.line),
+                      FractionallySizedBox(
+                        heightFactor: sp[i] == null || sp[i]!.count == 0 ? 0 : sp[i]!.wet / sp[i]!.count,
+                        widthFactor: 0.55,
+                        child: DecoratedBox(
+                            decoration: BoxDecoration(
+                                color: w.rain, borderRadius: const BorderRadius.vertical(top: Radius.circular(4)))),
+                      ),
+                    ]),
                   ),
                   const SizedBox(height: 3),
                   FittedBox(
@@ -506,7 +509,7 @@ class _Days extends StatelessWidget {
                     Text(localTime(dates[i], Duration.zero, loc, 'M/d'), style: TextStyle(fontSize: 12, color: w.muted)),
                   ]),
                 ),
-                WeatherIcon(d.sky, size: 34),
+                WeatherIcon(d.sky, size: 42),
                 SizedBox(width: 44, child: Text(tempText(d.medLow, fahrenheit), textAlign: TextAlign.end, style: numStyle)),
                 const SizedBox(width: 8),
                 Expanded(

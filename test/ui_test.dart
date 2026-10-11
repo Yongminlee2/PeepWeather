@@ -97,7 +97,7 @@ void main() {
     await tester.pumpWidget(WeatherApp(
         locale: const Locale('ko'),
         home: MediaQuery(
-            data: const MediaQueryData(size: Size(360, 800), textScaler: TextScaler.linear(2)),
+            data: const MediaQueryData(size: Size(360, 800), textScaler: TextScaler.linear(2), disableAnimations: true),
             child: Scaffold(body: ReportView(report: fakeReport(), fahrenheit: false, now: now)))));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
