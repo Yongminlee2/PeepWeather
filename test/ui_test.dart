@@ -46,8 +46,15 @@ Future<void> pumpReport(WidgetTester tester, {bool fahrenheit = false}) async {
   await tester.pumpAndSettle();
 }
 
+/// '동작 줄이기' 설정 — 날씨 아이콘 애니메이션이 멈춰서 pumpAndSettle 이 끝난다.
+void calm(WidgetTester tester) {
+  tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+}
+
 void main() {
   testWidgets('report shows comparison, divergence, failures, storms, attribution', (tester) async {
+    calm(tester);
     await pumpReport(tester);
     expect(tester.takeException(), isNull);
     expect(find.text('서울'), findsOneWidget);
@@ -58,7 +65,7 @@ void main() {
     expect(find.text('예보가 엇갈려요'), findsWidgets);
 
     // 칸을 누르면 기관별 값
-    await tester.tap(find.textContaining('비 ').first);
+    await tester.tap(find.textContaining(RegExp(r'^(없음|\d+곳)$')).first);
     await tester.pumpAndSettle();
     expect(find.text('노르웨이 기상청'), findsWidgets);
     expect(find.text('OpenWeather'), findsWidgets);
@@ -77,11 +84,13 @@ void main() {
   });
 
   testWidgets('fahrenheit setting changes temperatures', (tester) async {
+    calm(tester);
     await pumpReport(tester, fahrenheit: true);
     expect(find.textContaining('°F'), findsWidgets);
   });
 
   testWidgets('no overflow at 2x text scale', (tester) async {
+    calm(tester);
     tester.view.physicalSize = const Size(360, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -109,6 +118,7 @@ void main() {
   });
 
   testWidgets('Open-Meteo credit appears once for many models', (tester) async {
+    calm(tester);
     final base = fakeReport();
     final f = base.forecasts.first.data!;
     final r = Report(base.place, [

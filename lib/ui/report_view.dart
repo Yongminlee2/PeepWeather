@@ -11,6 +11,7 @@ import '../repository.dart';
 import 'detail_tables.dart';
 import 'format.dart';
 import 'theme.dart';
+import 'weather_icon.dart';
 
 /// 장소 하나의 비교 화면. 한 가지를 보여준다: 기관들이 얼마나 맞는가.
 /// 지금(가운데 값과 범위) → 24시간 퍼짐 띠 → 5일 범위 막대 → 미세먼지 눈금 → 태풍 → 위성 → 표 전부 → 출처.
@@ -31,9 +32,9 @@ class ReportView extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 40),
       children: [
         _Hero(r, fahrenheit, nowUtc),
-        _Section(l.next24, [_Hours(r, fahrenheit, nowUtc)]),
-        _Section(l.dailyTitle, [_Days(r, fahrenheit, nowUtc)]),
-        _Section(l.airTitle, [_Air(r)]),
+        _Section(l.next24, [_Hours(r, fahrenheit, nowUtc)], info: (l.infoTitleHours, l.infoHours)),
+        _Section(l.dailyTitle, [_Days(r, fahrenheit, nowUtc)], info: (l.infoTitlePop, l.infoPop)),
+        _Section(l.airTitle, [_Air(r)], info: (l.infoTitleAir, l.infoAir)),
         _Section(l.stormTitle, [_Storms(r)]),
         if (onSatellite != null)
           Padding(
@@ -76,16 +77,36 @@ class ReportView extends StatelessWidget {
 }
 
 class _Section extends StatelessWidget {
-  const _Section(this.title, this.children);
+  const _Section(this.title, this.children, {this.info});
   final String title;
   final List<Widget> children;
+  final (String, String)? info; // ⓘ 를 누르면 나오는 설명(제목, 본문)
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(top: 28),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: wx(context).ink)),
+          Row(children: [
+            Expanded(child: Text(title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: wx(context).ink))),
+            if (info case (final t, final body)) _InfoButton(t, body),
+          ]),
           const SizedBox(height: 10),
           ...children,
+        ]),
+      );
+}
+
+/// 설명 단추: 누르면 아래에서 설명이 올라온다.
+class _InfoButton extends StatelessWidget {
+  const _InfoButton(this.title, this.body, {this.color});
+  final String title, body;
+  final Color? color;
+  @override
+  Widget build(BuildContext context) => IconButton(
+        tooltip: title,
+        visualDensity: VisualDensity.compact,
+        icon: Icon(Icons.info_outline, size: 20, color: color ?? wx(context).muted),
+        onPressed: () => _sheet(context, title, [
+          Text(body, style: TextStyle(fontSize: 15, height: 1.6, color: wx(context).ink)),
         ]),
       );
 }
@@ -100,7 +121,6 @@ class _Hero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final w = wx(context);
     final loc = Localizations.localeOf(context).toString();
     final nows = [
       for (final f in r.forecasts)
@@ -115,50 +135,63 @@ class _Hero extends StatelessWidget {
         if (x.fail != null) x.source: x.fail!,
     };
     final mid = temps.isEmpty ? null : median(temps);
-    final sky = nows.isEmpty ? null : majoritySky([for (final n in nows) n.$2.sky]);
+    final sky = nows.isEmpty ? Sky.cloudy : majoritySky([for (final n in nows) n.$2.sky]);
+    final night = isNightAt(nowUtc, r.offset);
+    const fg = Colors.white;
+    final soft = Colors.white.withValues(alpha: 0.78);
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-      decoration: BoxDecoration(color: w.surface, borderRadius: BorderRadius.circular(20)),
+      padding: const EdgeInsets.fromLTRB(20, 18, 12, 18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+            begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: heroGradient(sky, night: night)),
+      ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(r.place.name, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: w.ink)),
-        if (latest != null)
-          Text(l.asOf(localTime(latest, r.offset, loc, 'M/d HH:mm')), style: TextStyle(fontSize: 13, color: w.muted)),
-        const SizedBox(height: 10),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(r.place.name, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: fg)),
+              if (latest != null)
+                Text(l.asOf(localTime(latest, r.offset, loc, 'M/d HH:mm')), style: TextStyle(fontSize: 13, color: soft)),
+            ]),
+          ),
+          _InfoButton(l.infoTitleNow, l.infoNow, color: soft),
+        ]),
+        const SizedBox(height: 6),
         if (mid != null) ...[
-          Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
             Flexible(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.bottomLeft,
-                child: Text(tempText(mid, fahrenheit),
-                    style: TextStyle(fontSize: 76, height: 1, color: w.ink, fontFeatures: tabular, letterSpacing: -2)),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                if (sky != null) Icon(skyIcon(sky), color: skyColor(sky), size: 28),
-                Text(l.middleValue, style: TextStyle(fontSize: 13, color: w.muted)),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.bottomLeft,
+                  child: Text(tempText(mid, fahrenheit),
+                      style: const TextStyle(fontSize: 80, height: 1, color: fg, fontFeatures: tabular, letterSpacing: -2)),
+                ),
+                Text(l.middleValue, style: TextStyle(fontSize: 13, color: soft)),
               ]),
             ),
+            WeatherIcon(sky, night: night, size: 112, animate: true),
           ]),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text(
               l.nowRange(temps.length,
                   '${tempText(temps.reduce(math.min), fahrenheit)} ~ ${tempText(temps.reduce(math.max), fahrenheit)}'),
-              style: TextStyle(fontSize: 15, color: w.ink)),
+              style: const TextStyle(fontSize: 15, color: fg)),
           const SizedBox(height: 10),
-          SizedBox(height: 22, child: CustomPaint(size: Size.infinite, painter: _DotStrip(temps, mid, w))),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: SizedBox(height: 22, child: CustomPaint(size: Size.infinite, painter: _DotStrip(temps, mid))),
+          ),
         ],
         if (failed.isNotEmpty) ...[
           const SizedBox(height: 12),
           Wrap(spacing: 10, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            Text(l.notAvailable, style: TextStyle(fontSize: 12, color: w.muted)),
+            Text(l.notAvailable, style: TextStyle(fontSize: 12, color: soft)),
             for (final MapEntry(key: id, value: fail) in failed.entries)
               Text.rich(TextSpan(children: [
-                TextSpan(text: '${sourceLabel(l, id)} ', style: TextStyle(fontSize: 12, color: w.ink)),
-                TextSpan(text: failText(l, fail), style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.error)),
+                TextSpan(text: '${sourceLabel(l, id)} ', style: const TextStyle(fontSize: 12, color: fg)),
+                TextSpan(text: failText(l, fail), style: const TextStyle(fontSize: 12, color: Color(0xFFFFC9C2))),
               ])),
           ]),
         ],
@@ -167,12 +200,11 @@ class _Hero extends StatelessWidget {
   }
 }
 
-/// 기관별 지금 기온을 한 줄 눈금 위의 점으로. 가운데 값은 진한 세로 막대.
+/// 기관별 지금 기온을 한 줄 눈금 위의 점으로. 가운데 값은 흰 세로 막대(하늘 배경 위).
 class _DotStrip extends CustomPainter {
-  _DotStrip(this.values, this.mid, this.w);
+  _DotStrip(this.values, this.mid);
   final List<double> values;
   final double mid;
-  final Wx w;
   @override
   void paint(Canvas c, Size s) {
     final lo = values.reduce(math.min), hi = values.reduce(math.max);
@@ -180,18 +212,18 @@ class _DotStrip extends CustomPainter {
     double x(double v) => 6 + (v - lo) / span * (s.width - 12);
     final y = s.height / 2;
     c.drawLine(Offset(6, y), Offset(s.width - 6, y), Paint()
-      ..color = w.line
+      ..color = Colors.white.withValues(alpha: 0.28)
       ..strokeWidth = 4
       ..strokeCap = StrokeCap.round);
     for (final v in values) {
-      c.drawCircle(Offset(x(v), y), 5, Paint()..color = w.band);
+      c.drawCircle(Offset(x(v), y), 5, Paint()..color = Colors.white.withValues(alpha: 0.7));
     }
     c.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(x(mid), y), width: 4, height: s.height), const Radius.circular(2)),
-        Paint()..color = w.ink);
+        Paint()..color = Colors.white);
   }
 
   @override
-  bool shouldRepaint(_DotStrip o) => o.values != values || o.w != w;
+  bool shouldRepaint(_DotStrip o) => o.values != values || o.mid != mid;
 }
 
 void _sheet(BuildContext context, String title, List<Widget> rows) => showModalBottomSheet<void>(
@@ -215,7 +247,7 @@ Widget _sourceRow(BuildContext context, String id, Sky sky, String main, String?
     padding: const EdgeInsets.symmetric(vertical: 7),
     child: Row(children: [
       Expanded(child: Text(sourceLabel(AppLocalizations.of(context), id), style: TextStyle(color: w.ink))),
-      Icon(skyIcon(sky), size: 20, color: skyColor(sky)),
+      WeatherIcon(sky, size: 30),
       SizedBox(
           width: 92,
           child: Text(main, textAlign: TextAlign.end, style: TextStyle(color: w.ink, fontFeatures: tabular, fontSize: 15))),
@@ -273,6 +305,18 @@ class _Hours extends StatelessWidget {
         if (diverging.isNotEmpty) _Legend(color: w.disagree, label: l.diverge, square: true),
       ]),
       const SizedBox(height: 8),
+      // 칸마다 가장 많은 기관이 고른 하늘
+      Row(children: [
+        for (var i = 0; i < slots.length; i++)
+          Expanded(
+            child: Center(
+              child: sp[i] == null
+                  ? const SizedBox(height: 34)
+                  : WeatherIcon(majoritySky([for (final c in sp[i]!.cells) c.$2.sky]),
+                      night: isNightAt(slots[i], r.offset), size: 34),
+            ),
+          ),
+      ]),
       LayoutBuilder(builder: (context, box) {
         final n = slots.length;
         return GestureDetector(
@@ -347,8 +391,14 @@ class _Hours extends StatelessWidget {
           ),
         );
       }),
-      const SizedBox(height: 6),
+      const SizedBox(height: 10),
       // 비를 예보한 기관 수 — 칸마다 채운 막대
+      Wrap(spacing: 6, crossAxisAlignment: WrapCrossAlignment.end, children: [
+        Text(l.rainVotesTitle, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: w.ink)),
+        Text(l.rainVotesOf(sp.whereType<HourSpread>().map((s) => s.count).fold<int>(0, math.max)),
+            style: TextStyle(fontSize: 12, color: w.muted)),
+      ]),
+      const SizedBox(height: 4),
       Row(children: [
         for (var i = 0; i < slots.length; i++)
           Expanded(
@@ -361,7 +411,7 @@ class _Hours extends StatelessWidget {
                   Container(
                     height: 26,
                     alignment: Alignment.bottomCenter,
-                    decoration: BoxDecoration(color: w.line.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(4)),
+                    decoration: BoxDecoration(border: Border.all(color: w.line), borderRadius: BorderRadius.circular(4)),
                     child: FractionallySizedBox(
                       heightFactor: sp[i] == null || sp[i]!.count == 0 ? 0 : sp[i]!.wet / sp[i]!.count,
                       widthFactor: 1,
@@ -376,8 +426,8 @@ class _Hours extends StatelessWidget {
                       sp[i] == null
                           ? '—'
                           : sp[i]!.wet == 0
-                              ? l.noRainVote
-                              : l.rainVotes(sp[i]!.count, sp[i]!.wet),
+                              ? l.noneShort
+                              : l.rainCount(sp[i]!.wet),
                       maxLines: 1,
                       style: TextStyle(fontSize: 11, color: sp[i] != null && sp[i]!.wet > 0 ? w.rain : w.muted),
                     ),
@@ -456,7 +506,7 @@ class _Days extends StatelessWidget {
                     Text(localTime(dates[i], Duration.zero, loc, 'M/d'), style: TextStyle(fontSize: 12, color: w.muted)),
                   ]),
                 ),
-                Icon(skyIcon(d.sky), size: 24, color: skyColor(d.sky)),
+                WeatherIcon(d.sky, size: 34),
                 SizedBox(width: 44, child: Text(tempText(d.medLow, fahrenheit), textAlign: TextAlign.end, style: numStyle)),
                 const SizedBox(width: 8),
                 Expanded(
@@ -466,17 +516,19 @@ class _Days extends StatelessWidget {
                 const SizedBox(width: 8),
                 SizedBox(width: 44, child: Text(tempText(d.medHigh, fahrenheit), style: numStyle)),
                 SizedBox(
-                  width: 74,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      d.popMax == null
-                          ? ''
-                          : l.rainPct(d.popMin == d.popMax ? '${d.popMax}' : '${d.popMin}~${d.popMax}'),
-                      style: TextStyle(fontSize: 13, color: d.diverges ? w.disagree : w.rain, fontFeatures: tabular),
-                    ),
-                  ),
+                  width: 70,
+                  child: d.popMax == null
+                      ? null
+                      : Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                          Text(l.popLabel, style: TextStyle(fontSize: 11, color: w.muted)),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Text(d.popMin == d.popMax ? '${d.popMax}%' : '${d.popMin}~${d.popMax}%',
+                                style: TextStyle(
+                                    fontSize: 14, color: d.diverges ? w.disagree : w.rain, fontFeatures: tabular)),
+                          ),
+                        ]),
                 ),
               ]),
             ),
@@ -524,7 +576,7 @@ class _Air extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(name, style: TextStyle(fontSize: 13, color: w.muted)),
+          Text('$name (${l.pmUnit})', style: TextStyle(fontSize: 13, color: w.muted)),
           const SizedBox(height: 4),
           SizedBox(height: 22, child: CustomPaint(size: Size.infinite, painter: _GradeScale(pts, cuts, cap, w))),
         ]),
@@ -536,7 +588,10 @@ class _Air extends StatelessWidget {
         scale(l.pm10, (a) => a.pm10, const [30, 80, 150], 200),
         scale(l.pm25, (a) => a.pm25, const [15, 35, 75], 100),
         Text(l.airHint, style: TextStyle(fontSize: 12, color: w.muted)),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
+        Align(
+            alignment: Alignment.centerRight,
+            child: Text(l.pmColumns, style: TextStyle(fontSize: 11, color: w.muted))),
       ],
       for (final a in r.air)
         Padding(

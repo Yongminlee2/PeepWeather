@@ -739,6 +739,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Filled dots are station measurements, hollow dots are model estimates'**
   String get airHint;
+
+  /// No description provided for @rainVotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources expecting rain'**
+  String get rainVotesTitle;
+
+  /// No description provided for @rainVotesOf.
+  ///
+  /// In en, this message translates to:
+  /// **'of {n}'**
+  String rainVotesOf(Object n);
+
+  /// No description provided for @rainCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{wet}'**
+  String rainCount(Object wet);
+
+  /// No description provided for @noneShort.
+  ///
+  /// In en, this message translates to:
+  /// **'none'**
+  String get noneShort;
+
+  /// No description provided for @popLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chance of rain'**
+  String get popLabel;
+
+  /// No description provided for @pmUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'µg/m³'**
+  String get pmUnit;
+
+  /// No description provided for @pmColumns.
+  ///
+  /// In en, this message translates to:
+  /// **'PM10 / PM2.5 (µg/m³)'**
+  String get pmColumns;
+
+  /// No description provided for @infoTitleNow.
+  ///
+  /// In en, this message translates to:
+  /// **'What is the middle value?'**
+  String get infoTitleNow;
+
+  /// No description provided for @infoNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Line up every source\'s current temperature from low to high; the middle one is shown. It is steadier than an average when one or two sources are far off.\n\nEach dot is one source. Close dots mean the sources agree; spread-out dots mean they don\'t.'**
+  String get infoNow;
+
+  /// No description provided for @infoTitleHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the chart'**
+  String get infoTitleHours;
+
+  /// No description provided for @infoHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue band: the range from the lowest to the highest forecast at that time. A wider band means more disagreement.\n\nDark line and numbers: the middle value of all forecasts.\n\nBlue bars: how many sources expect rain (chance 50% or more, or 0.5 mm or more).\n\nOrange background: forecasts clearly split. The middle half differ by more than 2.5 °C, or rain votes are close to half and half. A single outlier is not marked.'**
+  String get infoHours;
+
+  /// No description provided for @infoTitlePop.
+  ///
+  /// In en, this message translates to:
+  /// **'What does the % mean?'**
+  String get infoTitlePop;
+
+  /// No description provided for @infoPop.
+  ///
+  /// In en, this message translates to:
+  /// **'The chance that rain or snow (usually 0.1–1 mm or more) falls during that hour, or during that day for daily forecasts.\n\n70% means that in similar situations it rained about 7 times out of 10. It is not how much rain falls or how many hours it rains.\n\nA range like 1–72% means sources disagree: the lowest says 1%, the highest 72%. Some sources give only amounts (mm), not a chance.\n\nBars: the light band is all sources\' low to high; the dark bar is the middle low to middle high.'**
+  String get infoPop;
+
+  /// No description provided for @infoTitleAir.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading air quality numbers'**
+  String get infoTitleAir;
+
+  /// No description provided for @infoAir.
+  ///
+  /// In en, this message translates to:
+  /// **'µg/m³ is the weight of particles (millionths of a gram) in one cubic metre of air.\n\nPM10 are particles up to 10 µm, PM2.5 up to 2.5 µm.\n\nGrades (Korean standard)\nPM10: good 0–30, moderate 31–80, bad 81–150, very bad 151+\nPM2.5: good 0–15, moderate 16–35, bad 36–75, very bad 76+\n\nFilled dots are station measurements, hollow dots are model estimates. Measurements are more accurate; models cover places without stations but can be far off.'**
+  String get infoAir;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
 }
 
 class _AppLocalizationsDelegate

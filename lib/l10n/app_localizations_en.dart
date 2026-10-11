@@ -357,4 +357,60 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get airHint =>
       'Filled dots are station measurements, hollow dots are model estimates';
+
+  @override
+  String get rainVotesTitle => 'Sources expecting rain';
+
+  @override
+  String rainVotesOf(Object n) {
+    return 'of $n';
+  }
+
+  @override
+  String rainCount(Object wet) {
+    return '$wet';
+  }
+
+  @override
+  String get noneShort => 'none';
+
+  @override
+  String get popLabel => 'Chance of rain';
+
+  @override
+  String get pmUnit => 'µg/m³';
+
+  @override
+  String get pmColumns => 'PM10 / PM2.5 (µg/m³)';
+
+  @override
+  String get infoTitleNow => 'What is the middle value?';
+
+  @override
+  String get infoNow =>
+      'Line up every source\'s current temperature from low to high; the middle one is shown. It is steadier than an average when one or two sources are far off.\n\nEach dot is one source. Close dots mean the sources agree; spread-out dots mean they don\'t.';
+
+  @override
+  String get infoTitleHours => 'Reading the chart';
+
+  @override
+  String get infoHours =>
+      'Blue band: the range from the lowest to the highest forecast at that time. A wider band means more disagreement.\n\nDark line and numbers: the middle value of all forecasts.\n\nBlue bars: how many sources expect rain (chance 50% or more, or 0.5 mm or more).\n\nOrange background: forecasts clearly split. The middle half differ by more than 2.5 °C, or rain votes are close to half and half. A single outlier is not marked.';
+
+  @override
+  String get infoTitlePop => 'What does the % mean?';
+
+  @override
+  String get infoPop =>
+      'The chance that rain or snow (usually 0.1–1 mm or more) falls during that hour, or during that day for daily forecasts.\n\n70% means that in similar situations it rained about 7 times out of 10. It is not how much rain falls or how many hours it rains.\n\nA range like 1–72% means sources disagree: the lowest says 1%, the highest 72%. Some sources give only amounts (mm), not a chance.\n\nBars: the light band is all sources\' low to high; the dark bar is the middle low to middle high.';
+
+  @override
+  String get infoTitleAir => 'Reading air quality numbers';
+
+  @override
+  String get infoAir =>
+      'µg/m³ is the weight of particles (millionths of a gram) in one cubic metre of air.\n\nPM10 are particles up to 10 µm, PM2.5 up to 2.5 µm.\n\nGrades (Korean standard)\nPM10: good 0–30, moderate 31–80, bad 81–150, very bad 151+\nPM2.5: good 0–15, moderate 16–35, bad 36–75, very bad 76+\n\nFilled dots are station measurements, hollow dots are model estimates. Measurements are more accurate; models cover places without stations but can be far off.';
+
+  @override
+  String get close => 'Close';
 }
