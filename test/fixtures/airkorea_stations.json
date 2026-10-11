@@ -1,0 +1,1 @@
+{"response": {"header": {"resultCode": "00", "resultMsg": "NORMAL_CODE"}, "body": {"totalCount": 2, "items": [{"stationName": "중구", "dmX": "37.564639", "dmY": "126.975961", "addr": "서울 중구 덕수궁길 15"}, {"stationName": "연산동", "dmX": "35.185", "dmY": "129.083", "addr": "부산 연제구"}], "pageNo": 1, "numOfRows": 1000}}}

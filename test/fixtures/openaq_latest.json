@@ -1,0 +1,1 @@
+{"meta": {"found": 2}, "results": [{"datetime": {"utc": "2026-10-11T08:00:00Z"}, "value": 42.0, "sensorsId": 31, "locationsId": 333}, {"datetime": {"utc": "2026-10-11T08:00:00Z"}, "value": 18.5, "sensorsId": 32, "locationsId": 333}]}

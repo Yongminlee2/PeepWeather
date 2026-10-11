@@ -1,0 +1,1 @@
+{"response": {"header": {"resultCode": "00", "resultMsg": "NORMAL_CODE"}, "body": {"totalCount": 2, "items": [{"dataTime": "2026-10-11 24:00", "pm10Value": "-", "pm25Value": "12", "khaiGrade": "1"}, {"dataTime": "2026-10-11 23:00", "pm10Value": "30", "pm25Value": "14"}], "pageNo": 1, "numOfRows": 1000}}}

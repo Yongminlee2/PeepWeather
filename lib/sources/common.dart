@@ -21,3 +21,15 @@ DateTime dateOnly(String ymd) {
 }
 
 String coord(double v) => v.toStringAsFixed(4);
+
+/// 공공데이터포털(data.go.kr) 응답 오류 확인. 키 오류는 HTTP 200 + XML 로 온다.
+void checkDataGoKr(String body) {
+  if (body.contains('SERVICE_KEY_IS_NOT_REGISTERED') || body.contains('SERVICE_ACCESS_DENIED')) {
+    throw const FetchError(Fail.badKey);
+  }
+  if (body.contains('LIMITED_NUMBER_OF_SERVICE_REQUESTS')) throw const FetchError(Fail.quota);
+  if (body.trimLeft().startsWith('<')) throw const FetchError(Fail.parse);
+}
+
+String two(int v) => v.toString().padLeft(2, '0');
+String ymd(DateTime d) => '${d.year}${two(d.month)}${two(d.day)}';
