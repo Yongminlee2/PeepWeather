@@ -21,6 +21,8 @@ class CompareWidget : HomeWidgetProvider() {
             val v = RemoteViews(context.packageName, R.layout.compare_widget)
             v.setTextViewText(R.id.place, widgetData.getString("place", context.getString(R.string.app_name)))
             v.setTextViewText(R.id.time, widgetData.getString("time", ""))
+            v.setTextViewText(R.id.mid, widgetData.getString("mid", "—"))
+            v.setTextViewText(R.id.range, widgetData.getString("range", ""))
             rows.forEachIndexed { i, rid ->
                 val text = widgetData.getString("row$i", "") ?: ""
                 v.setTextViewText(rid, text)

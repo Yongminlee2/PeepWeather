@@ -431,4 +431,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get about => 'About';
+
+  @override
+  String widgetRange(Object n, Object range) {
+    return '$n sources $range';
+  }
+
+  @override
+  String get loadingSources => 'Collecting forecasts from every source';
 }

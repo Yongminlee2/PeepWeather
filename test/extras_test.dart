@@ -46,4 +46,11 @@ void main() {
       expect(g.last.icon, 'https://yongminlee2.github.io/legal/apps/icons/p.jpg');
     });
   });
+
+  test('widget headline: middle value and range across sources', () {
+    final (mid, range) = widgetHeadline(report(5), false, l)!;
+    expect(mid, '22°'); // 20,21,22,23,24 의 가운데
+    expect(range, '5곳 20° ~ 24°');
+    expect(widgetHeadline(report(0), false, l), isNull);
+  });
 }

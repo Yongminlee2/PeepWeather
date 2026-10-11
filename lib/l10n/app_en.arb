@@ -127,5 +127,7 @@
  "noPlaces": "None yet. Add a city with the search button on the main screen, then swipe between them.",
  "quickCities": "Popular cities",
  "whereWeather": "Where shall we look?",
- "about": "About"
+ "about": "About",
+ "widgetRange": "{n} sources {range}",
+ "loadingSources": "Collecting forecasts from every source"
 }

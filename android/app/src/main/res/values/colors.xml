@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 앱 바탕(안개 낀 하늘색)과 같게 — 켤 때 흰 화면이 번쩍이지 않게 -->
+    <color name="splash_bg">#EEF3F8</color>
+</resources>

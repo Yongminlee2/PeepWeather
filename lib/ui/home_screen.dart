@@ -147,10 +147,37 @@ class _PlacePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final r = st.reportFor(place);
     if (r == null) {
-      return Center(
-          child: st.isLoading(place)
-              ? const CircularProgressIndicator()
-              : FilledButton(onPressed: () => st.refresh(place), child: Text(AppLocalizations.of(context).retry)));
+      // 받아오는 동안에도 같은 하늘 카드에 장소 이름을 먼저 보여 준다
+      final l = AppLocalizations.of(context);
+      final loading = st.isLoading(place);
+      return ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 32), children: [
+        Container(
+          height: 260,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: const LinearGradient(
+                begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF24508A), Color(0xFF4A80B4)]),
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(place.name, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: Colors.white)),
+            const Spacer(),
+            if (loading)
+              Row(children: [
+                const SizedBox(
+                    width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white)),
+                const SizedBox(width: 12),
+                Text(l.loadingSources, style: TextStyle(fontSize: 15, color: Colors.white.withValues(alpha: 0.9))),
+              ])
+            else
+              FilledButton(
+                onPressed: () => st.refresh(place),
+                style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Wx.light.ink),
+                child: Text(l.retry),
+              ),
+          ]),
+        ),
+      ]);
     }
     return RefreshIndicator(
       onRefresh: () => st.refresh(place, force: true),

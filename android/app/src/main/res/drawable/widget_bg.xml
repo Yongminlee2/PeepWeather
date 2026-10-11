@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 앱 첫 화면의 하늘 카드와 같은 색: 짙은 남색 → 파랑 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#E6283593" />
-    <corners android:radius="16dp" />
+    <gradient
+        android:angle="270"
+        android:startColor="#FF24508A"
+        android:endColor="#FF4A80B4" />
+    <corners android:radius="22dp" />
 </shape>

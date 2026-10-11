@@ -865,6 +865,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'About'**
   String get about;
+
+  /// No description provided for @widgetRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} sources {range}'**
+  String widgetRange(Object n, Object range);
+
+  /// No description provided for @loadingSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Collecting forecasts from every source'**
+  String get loadingSources;
 }
 
 class _AppLocalizationsDelegate

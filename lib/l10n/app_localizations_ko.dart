@@ -428,4 +428,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get about => '정보';
+
+  @override
+  String widgetRange(Object n, Object range) {
+    return '$n곳 $range';
+  }
+
+  @override
+  String get loadingSources => '여러 기관에서 예보를 받아오는 중';
 }

@@ -127,5 +127,7 @@
  "noPlaces": "아직 없어요. 첫 화면 오른쪽 위 돋보기로 도시를 추가하면 옆으로 넘겨 볼 수 있어요.",
  "quickCities": "자주 찾는 도시",
  "whereWeather": "어디 날씨를 볼까요?",
- "about": "정보"
+ "about": "정보",
+ "widgetRange": "{n}곳 {range}",
+ "loadingSources": "여러 기관에서 예보를 받아오는 중"
 }
