@@ -115,7 +115,8 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
       return FutureBuilder<Uri>(
         future: _kma,
         builder: (context, snap) => snap.hasData
-            ? InteractiveViewer(maxScale: 6, child: Center(child: Image.network(snap.data.toString())))
+            ? InteractiveViewer(maxScale: 6, child: Center(child: Image.network(snap.data.toString(),
+                    errorBuilder: (_, _, _) => Text(l.failParse))))
             : snap.hasError
                 ? Center(child: Text(snap.error is FetchError ? failText(l, (snap.error as FetchError).fail) : l.failParse))
                 : const Center(child: CircularProgressIndicator()),

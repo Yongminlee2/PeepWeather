@@ -44,6 +44,15 @@ class AppState extends ChangeNotifier {
   Report? reportFor(Place p) => _reports[placeKey(p)];
   bool isLoading(Place p) => _loading.contains(placeKey(p));
 
+  /// 없거나 가장 새 자료가 30분보다 오래됐으면 다시 받을 때.
+  bool isStale(Place p, {DateTime? now}) {
+    final r = reportFor(p);
+    final times = [...?r?.forecasts, ...?r?.air].map((x) => x.asOf).whereType<DateTime>();
+    if (times.isEmpty) return true;
+    final newest = times.reduce((a, b) => a.isAfter(b) ? a : b);
+    return (now ?? DateTime.now()).toUtc().difference(newest) > const Duration(minutes: 30);
+  }
+
   Future<void> locate(String lang, String fallbackName) async {
     locating = true;
     notifyListeners();

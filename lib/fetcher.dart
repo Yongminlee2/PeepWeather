@@ -33,15 +33,17 @@ class Fetcher {
   Duration? freshCap;
 
   /// 같은 주소를 동시에 부르면 요청 하나를 같이 기다린다.
-  Future<Fetched> get(Uri url, {Duration maxAge = const Duration(minutes: 30), Map<String, String>? headers}) {
+  /// check: 응답 본문 검사(공공데이터포털은 키 오류도 200 으로 준다). 던지면 저장하지 않는다.
+  Future<Fetched> get(Uri url,
+      {Duration maxAge = const Duration(minutes: 30), Map<String, String>? headers, void Function(String body)? check}) {
     final key = url.toString();
     // whenComplete 콜백이 Future 를 돌려주면 그걸 기다리므로, 지운 값(자기 자신)을 돌려주지 않게 블록으로.
-    return _inFlight.putIfAbsent(key, () => _get(url, maxAge, headers).whenComplete(() {
+    return _inFlight.putIfAbsent(key, () => _get(url, maxAge, headers, check).whenComplete(() {
           _inFlight.remove(key);
         }));
   }
 
-  Future<Fetched> _get(Uri url, Duration maxAge, Map<String, String>? headers) async {
+  Future<Fetched> _get(Uri url, Duration maxAge, Map<String, String>? headers, void Function(String)? check) async {
     final file = File('${dir.path}/${_hash(url.toString())}.txt');
     final cached = await _read(file);
     final cap = freshCap;
@@ -61,9 +63,13 @@ class Fetcher {
     switch (res.statusCode) {
       case 200:
         final body = utf8.decode(res.bodyBytes, allowMalformed: true);
+        check?.call(body);
         final at = _now().toUtc();
         await dir.create(recursive: true);
-        await file.writeAsString('${at.toIso8601String()}\n$body');
+        // 임시 파일에 쓰고 바꿔치기 — 쓰다 죽거나 두 곳(앱·백그라운드)이 동시에 써도 반쪽 파일이 남지 않게
+        final tmp = File('${file.path}.${DateTime.now().microsecondsSinceEpoch}.tmp');
+        await tmp.writeAsString('${at.toIso8601String()}\n$body');
+        await tmp.rename(file.path);
         return Fetched(body, at);
       case 401 || 403:
         throw const FetchError(Fail.badKey);
@@ -75,12 +81,17 @@ class Fetcher {
     }
   }
 
+  /// 깨진 저장본은 없는 것으로 친다(다시 받으면 덮어쓴다).
   Future<Fetched?> _read(File f) async {
-    if (!await f.exists()) return null;
-    final s = await f.readAsString();
-    final nl = s.indexOf('\n');
-    final at = nl < 0 ? null : DateTime.tryParse(s.substring(0, nl));
-    return at == null ? null : Fetched(s.substring(nl + 1), at);
+    try {
+      if (!await f.exists()) return null;
+      final s = utf8.decode(await f.readAsBytes());
+      final nl = s.indexOf('\n');
+      final at = nl < 0 ? null : DateTime.tryParse(s.substring(0, nl));
+      return at == null ? null : Fetched(s.substring(nl + 1), at);
+    } catch (_) {
+      return null;
+    }
   }
 
   /// FNV-1a 64비트 — 파일 이름용(String.hashCode 는 실행마다 같다는 보장이 없음).

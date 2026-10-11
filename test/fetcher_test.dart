@@ -105,4 +105,22 @@ void main() {
     expect((await f.get(url)).body, 'b3');
     expect((await f.get(long, maxAge: const Duration(days: 30))).body, 'b2');
   });
+
+  test('check failure is not cached', () async {
+    var calls = 0;
+    final f = Fetcher(MockClient((_) async => http.Response('ERR${++calls}', 200)), dir, now: () => now);
+    void check(String b) => throw const FetchError(Fail.badKey);
+    await expectLater(f.get(url, check: check), failWith(Fail.badKey));
+    await expectLater(f.get(url, check: check), failWith(Fail.badKey));
+    expect(calls, 2);
+  });
+
+  test('corrupt cache file is ignored, not fatal', () async {
+    final f = Fetcher(MockClient((_) async => http.Response('fresh', 200)), dir, now: () => now);
+    await f.get(url);
+    for (final e in dir.listSync()) {
+      (e as File).writeAsBytesSync([0xff, 0xfe, 0x0a, 0xc3]);
+    }
+    expect((await f.get(url)).body, 'fresh');
+  });
 }

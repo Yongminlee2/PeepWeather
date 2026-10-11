@@ -29,7 +29,8 @@ class Day {
   final double maxC, minC;
   final Sky sky;
   final int? pop;
-  const Day(this.date, this.maxC, this.minC, this.sky, {this.pop});
+  final bool partial; // 시간별을 묶었는데 하루 일부만 있음(오늘 저녁만 등) — 엇갈림 판정에서 뺀다
+  const Day(this.date, this.maxC, this.minC, this.sky, {this.pop, this.partial = false});
 }
 
 class Forecast {

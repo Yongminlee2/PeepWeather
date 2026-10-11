@@ -97,6 +97,6 @@ Future<Stamped<List<Cyclone>>> kmaTyphoon(Fetcher f) async {
     'dataType': 'JSON',
     'fromTmFc': ymd(kst.subtract(const Duration(days: 3))),
     'toTmFc': ymd(kst),
-  }));
+  }), check: checkDataGoKr);
   return (parseKmaTyphoon(r.body), r.at);
 }

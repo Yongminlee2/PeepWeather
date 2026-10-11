@@ -83,7 +83,8 @@ Forecast parseKma(String vilageBody, String ncstBody) {
   }
   final days = [
     for (final d in daysFromHours(hours, kst))
-      Day(d.date, tmx[d.date] ?? d.maxC, tmn[d.date] ?? d.minC, d.sky, pop: d.pop)
+      Day(d.date, tmx[d.date] ?? d.maxC, tmn[d.date] ?? d.minC, d.sky,
+          pop: d.pop, partial: d.partial && !(tmx.containsKey(d.date) && tmn.containsKey(d.date)))
   ];
   final n = {for (final it in _items(ncstBody)) it['category'] as String: '${it['obsrValue']}'};
   final first = _items(ncstBody).first;
@@ -111,8 +112,8 @@ Future<Stamped<Forecast>> kmaForecast(Fetcher f, Place p) async {
         'ny': '$ny',
       });
   final (v, n) = await (
-    f.get(u('getVilageFcst', kmaBase(nowKst), '1500')),
-    f.get(u('getUltraSrtNcst', kmaNcstBase(nowKst), '20'))
+    f.get(u('getVilageFcst', kmaBase(nowKst), '1500'), check: checkDataGoKr),
+    f.get(u('getUltraSrtNcst', kmaNcstBase(nowKst), '20'), check: checkDataGoKr)
   ).wait;
   return (parseKma(v.body, n.body), oldest([v.at, n.at]));
 }

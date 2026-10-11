@@ -43,4 +43,16 @@ void main() {
     expect(st.reportFor(st.current!)!.forecasts.first.source, 'met');
     expect(st.isLoading(st.current!), isFalse);
   });
+
+  test('report older than 30 minutes is stale', () async {
+    final s = await Settings.load();
+    var t = DateTime.now().toUtc();
+    final st = AppState(s, Fetcher(fakeNet(), dir), locator: () async => (40.71, -74.01));
+    await st.locate('en', 'Current location');
+    final p = st.current!;
+    expect(st.isStale(p), isTrue); // 아직 없음
+    await st.refresh(p);
+    expect(st.isStale(p, now: t.add(const Duration(minutes: 10))), isFalse);
+    expect(st.isStale(p, now: t.add(const Duration(minutes: 31))), isTrue);
+  });
 }

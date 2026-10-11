@@ -103,4 +103,16 @@ void main() {
     final q = Place.fromJson(p.toJson());
     expect([q.name, q.country, q.lat, q.lon], ['서울', 'KR', 37.5, 127.0]);
   });
+
+  test('days built from partial hours are marked partial and never diverge', () {
+    final hs = [
+      Hour(DateTime.utc(2026, 10, 11, 9), 17, Sky.clear), // 서울 18시부터만 — 오늘은 일부
+      Hour(DateTime.utc(2026, 10, 11, 12), 15, Sky.clear),
+      for (var h = 0; h < 24; h += 3) Hour(DateTime.utc(2026, 10, 11, 15).add(Duration(hours: h)), 20, Sky.clear), // 10/12 전체
+    ];
+    final d = daysFromHours(hs, const Duration(hours: 9));
+    expect(d.map((x) => x.partial), [true, false]);
+    final full = Day(DateTime.utc(2026, 10, 11), 24, 12, Sky.clear);
+    expect(divergesDays([d.first, full]), isFalse);
+  });
 }

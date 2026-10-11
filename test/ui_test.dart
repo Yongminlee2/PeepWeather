@@ -68,4 +68,19 @@ void main() {
     await pumpReport(tester, fahrenheit: true);
     expect(find.textContaining('°F'), findsWidgets);
   });
+
+  testWidgets('no overflow at 2x text scale', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(WeatherApp(
+        locale: const Locale('ko'),
+        home: MediaQuery(
+            data: const MediaQueryData(size: Size(360, 800), textScaler: TextScaler.linear(2)),
+            child: Scaffold(body: ReportView(report: fakeReport(), fahrenheit: false, now: now)))));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.scrollUntilVisible(find.textContaining('Hagupit'), 300, scrollable: find.byType(Scrollable).first);
+    expect(tester.takeException(), isNull);
+  });
 }

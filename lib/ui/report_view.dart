@@ -105,8 +105,8 @@ class _NowRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final h = f.data?.now;
-    return SizedBox(
-      height: 44,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 44), // 글씨가 크면 줄이 늘어난다
       child: Row(children: [
         Expanded(child: _Label(f, nowUtc, offset)),
         if (h != null) ...[
@@ -133,6 +133,8 @@ class _Grid extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final warn = Colors.orange.withValues(alpha: 0.18);
+    final ts = MediaQuery.textScalerOf(context); // 큰 글씨 설정이면 칸 높이도 같이 키운다
+    final rowH = ts.scale(_rowH), headH = ts.scale(_headH);
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       if (diverging.contains(true))
         Padding(
@@ -147,8 +149,8 @@ class _Grid extends StatelessWidget {
         SizedBox(
           width: _labelW,
           child: Column(children: [
-            const SizedBox(height: _headH),
-            for (final r in rows) SizedBox(height: _rowH, child: Align(alignment: Alignment.centerLeft, child: _Label(r, nowUtc, offset))),
+            SizedBox(height: headH),
+            for (final r in rows) SizedBox(height: rowH, child: Align(alignment: Alignment.centerLeft, child: _Label(r, nowUtc, offset))),
           ]),
         ),
         Expanded(
@@ -161,14 +163,16 @@ class _Grid extends StatelessWidget {
                   color: diverging[c] ? warn : null,
                   child: Column(children: [
                     SizedBox(
-                      height: _headH,
+                      height: headH,
                       child: Center(
                           child: Row(mainAxisSize: MainAxisSize.min, children: [
                         if (diverging[c]) const Icon(Icons.warning_amber, size: 12, color: Colors.orange),
-                        Flexible(child: Text(headers[c], textAlign: TextAlign.center, style: const TextStyle(fontSize: 11))),
+                        Flexible(
+                            child: Text(headers[c],
+                                textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11))),
                       ])),
                     ),
-                    for (final r in rows) SizedBox(height: _rowH, child: r.data == null ? const Center(child: Text('—')) : cell(r.data!, c)),
+                    for (final r in rows) SizedBox(height: rowH, child: r.data == null ? const Center(child: Text('—')) : cell(r.data!, c)),
                   ]),
                 ),
             ]),

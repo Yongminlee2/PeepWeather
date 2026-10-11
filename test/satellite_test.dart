@@ -43,4 +43,8 @@ void main() {
     final u = parseKmaSat(File('test/fixtures/kma_sat.json').readAsStringSync());
     expect(u.toString(), endsWith('_202610110810.srv.png'));
   });
+
+  test('KMA image url is upgraded to https (Android blocks cleartext)', () {
+    expect(parseKmaSat(File('test/fixtures/kma_sat.json').readAsStringSync()).scheme, 'https');
+  });
 }

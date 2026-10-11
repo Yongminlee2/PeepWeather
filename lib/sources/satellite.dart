@@ -63,7 +63,8 @@ Uri parseKmaSat(String body) {
   checkDataGoKr(body);
   final urls = RegExp(r'https?://[^\s,\]"]+\.png').allMatches(body).map((m) => m[0]!).toList()..sort();
   if (urls.isEmpty) throw const FormatException('no image');
-  return Uri.parse(urls.last);
+  // 안드로이드 9+ 는 http 를 막는다 — 기상청 이미지 서버는 https 도 받는다
+  return Uri.parse(urls.last).replace(scheme: 'https');
 }
 
 Future<Uri> kmaSatImage(Fetcher f) async {
@@ -80,6 +81,7 @@ Future<Uri> kmaSatImage(Fetcher f) async {
         'area': 'ko',
         'time': ymd(kst),
       }),
-      maxAge: const Duration(minutes: 10));
+      maxAge: const Duration(minutes: 10),
+      check: checkDataGoKr);
   return parseKmaSat(r.body);
 }

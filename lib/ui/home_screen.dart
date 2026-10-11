@@ -19,12 +19,24 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _pages = PageController();
   int _page = 0;
   bool _started = false;
 
   AppState get st => widget.state;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  /// 앱으로 돌아왔을 때 오래된 자료면 다시 받는다(아침에 어젯밤 자료가 남아 있지 않게).
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState s) {
+    if (s == AppLifecycleState.resumed) _load(_page);
+  }
 
   @override
   void didChangeDependencies() {
@@ -41,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _load(int i) {
     final ps = st.places;
-    if (i < ps.length && st.reportFor(ps[i]) == null) st.refresh(ps[i]);
+    if (i >= 0 && i < ps.length && st.isStale(ps[i])) st.refresh(ps[i]);
   }
 
   Future<void> _search() async {
@@ -54,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pages.dispose();
     super.dispose();
   }

@@ -39,9 +39,9 @@ Future<Stamped<Air>> airKorea(Fetcher f, Place p) async {
   Uri u(String path, Map<String, String> q) => Uri.https('apis.data.go.kr', '/B552584/$path',
       {'serviceKey': Keys.dataGoKr, 'returnType': 'json', 'pageNo': '1', ...q});
   final st = await f.get(u('MsrstnInfoInqireSvc/getMsrstnList', {'numOfRows': '1000'}),
-      maxAge: const Duration(days: 30));
+      maxAge: const Duration(days: 30), check: checkDataGoKr);
   final name = nearestStation(parseStations(st.body), p.lat, p.lon);
   final r = await f.get(u('ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty',
-      {'numOfRows': '1', 'stationName': name, 'dataTerm': 'DAILY', 'ver': '1.3'}));
+      {'numOfRows': '1', 'stationName': name, 'dataTerm': 'DAILY', 'ver': '1.3'}), check: checkDataGoKr);
   return (parseAirKorea(r.body, name), r.at);
 }

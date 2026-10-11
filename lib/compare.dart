@@ -38,9 +38,12 @@ List<Day> daysFromHours(List<Hour> hours, Duration offset) {
       () {
         final hs = byDate[d]!;
         final pops = hs.map((h) => h.pop).whereType<int>();
+        final first = hs.first.time.add(offset).hour, last = hs.last.time.add(offset).hour;
         return Day(d, hs.map((h) => h.tempC).reduce(max), hs.map((h) => h.tempC).reduce(min),
             worstSky(hs.map((h) => h.sky)),
-            pop: pops.isEmpty ? null : pops.reduce(max));
+            pop: pops.isEmpty ? null : pops.reduce(max),
+            // 새벽(3시 이전)부터 저녁(18시 이후)까지 있어야 하루치로 본다(MET 6시간 간격은 18시가 마지막)
+            partial: first > 3 || last < 18);
       }()
   ];
 }
@@ -60,7 +63,7 @@ bool divergesHours(List<Hour?> cells) {
 }
 
 bool divergesDays(List<Day?> cells) {
-  final ds = cells.whereType<Day>().toList();
+  final ds = cells.whereType<Day>().where((d) => !d.partial).toList();
   return _diverges([for (final d in ds) d.maxC], [for (final d in ds) (d.pop, null)]);
 }
 
