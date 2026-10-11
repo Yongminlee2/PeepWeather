@@ -11,7 +11,7 @@ import 'package:workmanager/workmanager.dart';
 
 import 'alerts.dart';
 import 'fetcher.dart';
-import 'l10n/app_localizations.dart';
+import 'home_widget_sync.dart';
 import 'repository.dart';
 import 'settings.dart';
 
@@ -25,11 +25,6 @@ final notifications = FlutterLocalNotificationsPlugin();
 Future<void> initNotifications() => notifications.initialize(
     settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'), iOS: DarwinInitializationSettings()));
-
-AppLocalizations deviceL10n() {
-  final code = PlatformDispatcher.instance.locale.languageCode;
-  return lookupAppLocalizations(Locale(code == 'ko' ? 'ko' : 'en'));
-}
 
 /// 앱 시작 때: 2시간마다 확인 등록.
 Future<void> scheduleChecks() async {
@@ -59,7 +54,9 @@ Future<bool> runCheck() async {
   final report = await loadReport(await makeFetcher(), place, background: true);
   final prefs = await SharedPreferences.getInstance();
   final sent = (jsonDecode(prefs.getString('alertsSent') ?? '{}') as Map).cast<String, String>();
-  final alerts = decideAlerts(report, s, sent, DateTime.now().toUtc(), deviceL10n());
+  final l = deviceL10n();
+  await syncWidget(report, s.fahrenheit, l);
+  final alerts = decideAlerts(report, s, sent, DateTime.now().toUtc(), l);
   if (alerts.isNotEmpty) {
     await initNotifications();
     for (final a in alerts) {

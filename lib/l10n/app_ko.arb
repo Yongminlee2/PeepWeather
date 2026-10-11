@@ -69,5 +69,10 @@
  "airBadBody": "{source} 기준",
  "stormNear": "태풍 {name} 접근",
  "stormNearBody": "{place}에서 {km}km",
- "moreGames": "개발자의 다른 게임"
+ "moreGames": "개발자의 다른 게임",
+ "moreLoading": "불러오는 중…",
+ "moreOffline": "인터넷에 연결하면 볼 수 있어요",
+ "moreEmpty": "아직 목록이 없어요",
+ "moreNow": "지금 앱",
+ "moreGet": "받기"
 }

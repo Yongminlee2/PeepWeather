@@ -237,4 +237,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moreGames => 'More games by the developer';
+
+  @override
+  String get moreLoading => 'Loading…';
+
+  @override
+  String get moreOffline => 'Connect to the internet to see the list';
+
+  @override
+  String get moreEmpty => 'Nothing here yet';
+
+  @override
+  String get moreNow => 'This app';
+
+  @override
+  String get moreGet => 'Get';
 }

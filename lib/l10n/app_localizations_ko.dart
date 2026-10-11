@@ -237,4 +237,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get moreGames => '개발자의 다른 게임';
+
+  @override
+  String get moreLoading => '불러오는 중…';
+
+  @override
+  String get moreOffline => '인터넷에 연결하면 볼 수 있어요';
+
+  @override
+  String get moreEmpty => '아직 목록이 없어요';
+
+  @override
+  String get moreNow => '지금 앱';
+
+  @override
+  String get moreGet => '받기';
 }

@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'app_state.dart';
 import 'background.dart';
+import 'home_widget_sync.dart';
 import 'l10n/app_localizations.dart';
 import 'settings.dart';
 import 'ui/home_screen.dart';
@@ -10,7 +11,9 @@ import 'ui/satellite_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final state = AppState(await Settings.load(), await makeFetcher());
+  final settings = await Settings.load();
+  final state = AppState(settings, await makeFetcher(),
+      onReport: (r) => syncWidget(r, settings.fahrenheit, deviceL10n()).ignore());
   scheduleChecks().ignore(); // 알림 등록 실패가 앱 시작을 막지 않게
   runApp(WeatherApp(
       home: HomeScreen(

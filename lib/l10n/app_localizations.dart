@@ -517,6 +517,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More games by the developer'**
   String get moreGames;
+
+  /// No description provided for @moreLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get moreLoading;
+
+  /// No description provided for @moreOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the internet to see the list'**
+  String get moreOffline;
+
+  /// No description provided for @moreEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet'**
+  String get moreEmpty;
+
+  /// No description provided for @moreNow.
+  ///
+  /// In en, this message translates to:
+  /// **'This app'**
+  String get moreNow;
+
+  /// No description provided for @moreGet.
+  ///
+  /// In en, this message translates to:
+  /// **'Get'**
+  String get moreGet;
 }
 
 class _AppLocalizationsDelegate

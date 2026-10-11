@@ -28,7 +28,8 @@ Future<(double, double)?> deviceLocation() async {
 }
 
 class AppState extends ChangeNotifier {
-  AppState(this.settings, this.fetcher, {Locator? locator}) : _locator = locator ?? deviceLocation;
+  AppState(this.settings, this.fetcher, {Locator? locator, this.onReport}) : _locator = locator ?? deviceLocation;
+  final void Function(Report r)? onReport; // 첫 장(현재 위치)을 새로 받았을 때 — 홈 화면 위젯 갱신
   final Settings settings;
   final Fetcher fetcher;
   final Locator _locator;
@@ -71,7 +72,8 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     fetcher.freshCap = force ? const Duration(minutes: 5) : null;
     try {
-      _reports[k] = await loadReport(fetcher, p);
+      final r = _reports[k] = await loadReport(fetcher, p);
+      if (places.isNotEmpty && placeKey(places.first) == k) onReport?.call(r);
     } finally {
       fetcher.freshCap = null;
       _loading.remove(k);

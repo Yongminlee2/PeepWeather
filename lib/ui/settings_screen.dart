@@ -4,13 +4,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../settings.dart';
 import 'format.dart';
+import 'more_games_screen.dart';
 
 const privacyUrl = 'https://yongminlee2.github.io/legal/peepweather/privacy.html';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key, required this.settings, this.extra = const []});
+  const SettingsScreen({super.key, required this.settings});
   final Settings settings;
-  final List<Widget> extra; // 예: 개발자의 다른 게임
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,10 @@ class SettingsScreen extends StatelessWidget {
           header(l.attribution),
           for (final (text, url) in attributions.values)
             ListTile(dense: true, title: Text(text), onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication)),
-          ...extra,
+          ListTile(
+              leading: const Icon(Icons.apps),
+              title: Text(l.moreGames),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MoreGamesScreen()))),
           ListTile(
               leading: const Icon(Icons.privacy_tip_outlined),
               title: Text(l.privacy),

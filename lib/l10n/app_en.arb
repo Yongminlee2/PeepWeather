@@ -69,5 +69,10 @@
  "airBadBody": "per {source}",
  "stormNear": "Cyclone {name} approaching",
  "stormNearBody": "{km} km from {place}",
- "moreGames": "More games by the developer"
+ "moreGames": "More games by the developer",
+ "moreLoading": "Loading…",
+ "moreOffline": "Connect to the internet to see the list",
+ "moreEmpty": "Nothing here yet",
+ "moreNow": "This app",
+ "moreGet": "Get"
 }
