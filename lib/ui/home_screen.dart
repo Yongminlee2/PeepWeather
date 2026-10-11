@@ -221,7 +221,7 @@ class _NoLocation extends StatelessWidget {
               onPressed: onSearch,
               icon: const Icon(Icons.search),
               label: Text(l.search),
-              style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: wx(context).ink),
+              style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Wx.light.ink),
             ),
             TextButton(
               onPressed: Geolocator.openAppSettings,

@@ -111,8 +111,11 @@ void main() {
       noLoc = AppState(settings, Fetcher(fakeNet(), Directory.systemTemp.createTempSync('s')), locator: () async => null);
       await noLoc.locate('ko', '현재 위치');
     });
-    await shot(tester, 'search', SearchScreen(state: noLoc));
-    await shot(tester, 'settings', SettingsScreen(settings: settings));
-    await shot(tester, 'home_no_location', HomeScreen(state: noLoc));
+    for (final dark in [false, true]) {
+      final sfx = dark ? '_dark' : '';
+      await shot(tester, 'search$sfx', SearchScreen(state: noLoc), dark: dark);
+      await shot(tester, 'settings$sfx', SettingsScreen(settings: settings), dark: dark);
+      await shot(tester, 'home_no_location$sfx', HomeScreen(state: noLoc), dark: dark);
+    }
   }, skip: dir == null);
 }
