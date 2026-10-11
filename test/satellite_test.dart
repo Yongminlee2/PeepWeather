@@ -19,9 +19,9 @@ void main() {
     expect(satLayersFor(const Place('NY', 'US', 40.7, -74))[1].tileUrl, contains('GOES-East_ABI_GeoColor'));
   });
 
-  test('frames go back from now minus 80 min in 10 min steps, oldest first', () {
+  test('frames go back from now minus 90 min in 10 min steps, oldest first', () {
     expect(satFrames(DateTime.utc(2026, 10, 11, 8, 7), count: 3),
-        [DateTime.utc(2026, 10, 11, 6, 20), DateTime.utc(2026, 10, 11, 6, 30), DateTime.utc(2026, 10, 11, 6, 40)]);
+        [DateTime.utc(2026, 10, 11, 6, 10), DateTime.utc(2026, 10, 11, 6, 20), DateTime.utc(2026, 10, 11, 6, 30)]);
   });
 
   test('urlAt fills time or default', () {
@@ -54,5 +54,13 @@ void main() {
   test('frames honour a per-layer lag', () {
     expect(satFrames(DateTime.utc(2026, 10, 11, 8, 7), count: 2, lag: const Duration(minutes: 20)),
         [DateTime.utc(2026, 10, 11, 7, 30), DateTime.utc(2026, 10, 11, 7, 40)]);
+  });
+
+  test('frame label says the local time for timed frames', () {
+    expect(frameLabel(DateTime.utc(2026, 10, 11, 10, 30), const Duration(hours: 9)), '10/11 19:30');
+  });
+
+  test('map layers loop 2 hours in 12 frames (memory on small phones)', () {
+    expect(satFrames(DateTime.utc(2026, 10, 11, 8, 7)).length, 12);
   });
 }

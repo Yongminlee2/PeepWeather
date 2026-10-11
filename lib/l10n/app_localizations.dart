@@ -625,6 +625,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'CAMS (Copernicus)'**
   String get srcOmCams;
+
+  /// No description provided for @satDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'One image a day (today)'**
+  String get satDaily;
+
+  /// No description provided for @satModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Map computed by a forecast model'**
+  String get satModel;
+
+  /// No description provided for @satLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest'**
+  String get satLatest;
 }
 
 class _AppLocalizationsDelegate

@@ -291,4 +291,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get srcOmCams => 'CAMS (Copernicus)';
+
+  @override
+  String get satDaily => 'One image a day (today)';
+
+  @override
+  String get satModel => 'Map computed by a forecast model';
+
+  @override
+  String get satLatest => 'Latest';
 }

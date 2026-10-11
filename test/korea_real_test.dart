@@ -57,4 +57,13 @@ void main() {
   });
 
   test('Fail enum unaffected', () => expect(Fail.values, contains(Fail.notCovered)));
+
+  test('KMA satellite frames: every 10 minutes, oldest first, full size, with UTC time', () {
+    final fs = parseKmaSatFrames(fx('kma_sat_real.json'), count: 18);
+    expect(fs.length, 18);
+    expect(fs.last.$1, DateTime.utc(2026, 10, 11, 10, 32));
+    expect(fs[fs.length - 2].$1, DateTime.utc(2026, 10, 11, 10, 22));
+    expect(fs.first.$1.isBefore(fs.last.$1), isTrue);
+    expect(fs.every((f) => f.$2.toString().endsWith('.srv.png') && f.$2.scheme == 'https'), isTrue);
+  });
 }

@@ -291,4 +291,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get srcOmCams => 'CAMS(유럽 코페르니쿠스)';
+
+  @override
+  String get satDaily => '하루 한 장 촬영(오늘 낮)';
+
+  @override
+  String get satModel => '예측 모델이 계산한 지도';
+
+  @override
+  String get satLatest => '가장 최근';
 }

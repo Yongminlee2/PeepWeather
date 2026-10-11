@@ -87,5 +87,8 @@
  "srcOmUkmo": "UKMO (UK)",
  "srcOmCma": "CMA (China)",
  "srcOmBom": "BOM (Australia)",
- "srcOmCams": "CAMS (Copernicus)"
+ "srcOmCams": "CAMS (Copernicus)",
+ "satDaily": "One image a day (today)",
+ "satModel": "Map computed by a forecast model",
+ "satLatest": "Latest"
 }
