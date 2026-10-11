@@ -300,4 +300,60 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get satLatest => '가장 최근';
+
+  @override
+  String nowRange(Object n, Object range) {
+    return '$n곳 예보 범위 $range';
+  }
+
+  @override
+  String get middleValue => '가운데 값';
+
+  @override
+  String get notAvailable => '받지 못한 곳';
+
+  @override
+  String get next24 => '앞으로 24시간';
+
+  @override
+  String get legendRange => '기관별 범위';
+
+  @override
+  String get legendMid => '가운데 값';
+
+  @override
+  String rainVotes(Object n, Object wet) {
+    return '비 $wet/$n';
+  }
+
+  @override
+  String get noRainVote => '비 없음';
+
+  @override
+  String get tapHint => '칸을 누르면 기관별 값을 볼 수 있어요';
+
+  @override
+  String rainPct(Object v) {
+    return '비 $v%';
+  }
+
+  @override
+  String get measured => '실측';
+
+  @override
+  String get modelEstimate => '모델 추정';
+
+  @override
+  String get detailTable => '기관별 숫자 전부 보기';
+
+  @override
+  String sheetAt(Object when) {
+    return '$when 기관별 예보';
+  }
+
+  @override
+  String get today => '오늘';
+
+  @override
+  String get airHint => '채운 점은 측정소에서 잰 값, 빈 점은 모델이 계산한 값';
 }

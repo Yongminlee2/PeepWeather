@@ -8,6 +8,7 @@ import 'l10n/app_localizations.dart';
 import 'settings.dart';
 import 'ui/home_screen.dart';
 import 'ui/satellite_screen.dart';
+import 'ui/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,11 +40,8 @@ class WeatherApp extends StatelessWidget {
         ],
         supportedLocales: AppLocalizations.supportedLocales,
         locale: locale,
-        theme: ThemeData(colorSchemeSeed: Colors.indigo, useMaterial3: true),
-        darkTheme: ThemeData(
-            colorSchemeSeed: Colors.indigo,
-            brightness: Brightness.dark,
-            useMaterial3: true),
+        theme: buildTheme(Brightness.light),
+        darkTheme: buildTheme(Brightness.dark),
         home: home ??
             Builder(
                 builder: (c) => Scaffold(

@@ -643,6 +643,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Latest'**
   String get satLatest;
+
+  /// No description provided for @nowRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} forecasts range {range}'**
+  String nowRange(Object n, Object range);
+
+  /// No description provided for @middleValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle value'**
+  String get middleValue;
+
+  /// No description provided for @notAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available'**
+  String get notAvailable;
+
+  /// No description provided for @next24.
+  ///
+  /// In en, this message translates to:
+  /// **'Next 24 hours'**
+  String get next24;
+
+  /// No description provided for @legendRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Range across sources'**
+  String get legendRange;
+
+  /// No description provided for @legendMid.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle value'**
+  String get legendMid;
+
+  /// No description provided for @rainVotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain {wet}/{n}'**
+  String rainVotes(Object n, Object wet);
+
+  /// No description provided for @noRainVote.
+  ///
+  /// In en, this message translates to:
+  /// **'No rain'**
+  String get noRainVote;
+
+  /// No description provided for @tapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a column to see each source'**
+  String get tapHint;
+
+  /// No description provided for @rainPct.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain {v}%'**
+  String rainPct(Object v);
+
+  /// No description provided for @measured.
+  ///
+  /// In en, this message translates to:
+  /// **'Measured'**
+  String get measured;
+
+  /// No description provided for @modelEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get modelEstimate;
+
+  /// No description provided for @detailTable.
+  ///
+  /// In en, this message translates to:
+  /// **'All numbers by source'**
+  String get detailTable;
+
+  /// No description provided for @sheetAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Forecasts for {when}'**
+  String sheetAt(Object when);
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @airHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled dots are station measurements, hollow dots are model estimates'**
+  String get airHint;
 }
 
 class _AppLocalizationsDelegate

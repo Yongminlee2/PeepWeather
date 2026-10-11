@@ -51,9 +51,19 @@ void main() {
     await pumpReport(tester);
     expect(tester.takeException(), isNull);
     expect(find.text('서울'), findsOneWidget);
-    expect(find.text('노르웨이 기상청'), findsWidgets);
+    expect(find.text('가운데 값'), findsWidgets);
+    expect(find.textContaining('2곳 예보 범위'), findsOneWidget);
+    expect(find.text('받지 못한 곳'), findsOneWidget);
+    expect(find.textContaining('설정 필요'), findsWidgets);
     expect(find.text('예보가 엇갈려요'), findsWidgets);
-    expect(find.text('설정 필요'), findsWidgets);
+
+    // 칸을 누르면 기관별 값
+    await tester.tap(find.textContaining('비 ').first);
+    await tester.pumpAndSettle();
+    expect(find.text('노르웨이 기상청'), findsWidgets);
+    expect(find.text('OpenWeather'), findsWidgets);
+    Navigator.of(tester.element(find.text('노르웨이 기상청').first)).pop();
+    await tester.pumpAndSettle();
 
     await tester.scrollUntilVisible(find.text('오늘 한도 초과'), 300, scrollable: find.byType(Scrollable).first);
     expect(find.text('나쁨'), findsWidgets);

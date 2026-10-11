@@ -115,4 +115,66 @@ void main() {
     final full = Day(DateTime.utc(2026, 10, 11), 24, 12, Sky.clear);
     expect(divergesDays([d.first, full]), isFalse);
   });
+
+  group('spread across agencies', () {
+    final t = DateTime.utc(2026, 10, 11, 3);
+    Result<Forecast> fc(String id, double c, {int? pop, double? mm}) =>
+        Result(id, data: Forecast(hours: [Hour(t, c, Sky.cloudy, pop: pop, mm: mm)], days: [
+          Day(DateTime.utc(2026, 10, 12), c + 5, c - 5, Sky.rain, pop: pop),
+        ]));
+
+    test('median of odd and even lists', () {
+      expect(median([3, 1, 2]), 2);
+      expect(median([4, 1, 3, 2]), 2.5);
+    });
+
+    test('hour spread: range, median, rain votes, failures ignored', () {
+      final s = hourSpread([
+        fc('a', 20, pop: 70),
+        fc('b', 24, pop: 10),
+        fc('c', 22, mm: 0.8),
+        const Result('d', fail: Fail.noKey),
+      ], t)!;
+      expect([s.min, s.max, s.median, s.count], [20.0, 24.0, 22.0, 3]);
+      expect(s.wet, 2); // a(70%), c(0.8mm)
+      expect(s.diverges, isTrue);
+      expect(s.cells.map((c) => c.$1), ['a', 'c', 'b']); // 기온 낮은 순
+    });
+
+    test('hour spread is null when nobody covers that time', () {
+      expect(hourSpread([fc('a', 20)], t.add(const Duration(hours: 9))), isNull);
+    });
+
+    test('day spread: low and high ranges with medians and rain range', () {
+      final d = daySpread([fc('a', 20, pop: 30), fc('b', 24, pop: 80), fc('c', 22, pop: 50)], DateTime.utc(2026, 10, 12))!;
+      expect([d.lowMin, d.lowMax, d.highMin, d.highMax], [15.0, 19.0, 25.0, 29.0]);
+      expect([d.medLow, d.medHigh], [17.0, 27.0]);
+      expect([d.popMin, d.popMax], [30, 80]);
+      expect(d.count, 3);
+      expect(d.sky, Sky.rain);
+    });
+  });
+
+  group('divergence with many sources looks at the middle half, not one outlier', () {
+    final t = DateTime.utc(2026);
+    Hour h(double c, {int? pop}) => Hour(t, c, Sky.cloudy, pop: pop);
+
+    test('one warm outlier among many does not count', () {
+      expect(divergesHours([h(17), h(17.5), h(18), h(18), h(18.5), h(22.5)]), isFalse);
+    });
+
+    test('middle half more than 2.5 degrees apart counts', () {
+      expect(divergesHours([h(15), h(16), h(19), h(20), h(21), h(22)]), isTrue);
+    });
+
+    test('rain votes split near half counts, a lone rain vote does not', () {
+      expect(divergesHours([h(18, pop: 70), h(18, pop: 60), h(18, pop: 10), h(18, pop: 5), h(18, pop: 0)]), isTrue);
+      expect(divergesHours([h(18, pop: 70), h(18, pop: 10), h(18, pop: 5), h(18, pop: 0), h(18, pop: 0)]), isFalse);
+    });
+
+    test('quantile interpolates', () {
+      expect(quantile([1, 2, 3, 4], 0.25), 1.75);
+      expect(quantile([1, 2, 3, 4], 0.75), 3.25);
+    });
+  });
 }

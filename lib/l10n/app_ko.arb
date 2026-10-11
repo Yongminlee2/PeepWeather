@@ -90,5 +90,21 @@
  "srcOmCams": "CAMS(유럽 코페르니쿠스)",
  "satDaily": "하루 한 장 촬영(오늘 낮)",
  "satModel": "예측 모델이 계산한 지도",
- "satLatest": "가장 최근"
+ "satLatest": "가장 최근",
+ "nowRange": "{n}곳 예보 범위 {range}",
+ "middleValue": "가운데 값",
+ "notAvailable": "받지 못한 곳",
+ "next24": "앞으로 24시간",
+ "legendRange": "기관별 범위",
+ "legendMid": "가운데 값",
+ "rainVotes": "비 {wet}/{n}",
+ "noRainVote": "비 없음",
+ "tapHint": "칸을 누르면 기관별 값을 볼 수 있어요",
+ "rainPct": "비 {v}%",
+ "measured": "실측",
+ "modelEstimate": "모델 추정",
+ "detailTable": "기관별 숫자 전부 보기",
+ "sheetAt": "{when} 기관별 예보",
+ "today": "오늘",
+ "airHint": "채운 점은 측정소에서 잰 값, 빈 점은 모델이 계산한 값"
 }

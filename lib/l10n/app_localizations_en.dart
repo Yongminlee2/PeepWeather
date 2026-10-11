@@ -300,4 +300,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get satLatest => 'Latest';
+
+  @override
+  String nowRange(Object n, Object range) {
+    return '$n forecasts range $range';
+  }
+
+  @override
+  String get middleValue => 'Middle value';
+
+  @override
+  String get notAvailable => 'Not available';
+
+  @override
+  String get next24 => 'Next 24 hours';
+
+  @override
+  String get legendRange => 'Range across sources';
+
+  @override
+  String get legendMid => 'Middle value';
+
+  @override
+  String rainVotes(Object n, Object wet) {
+    return 'Rain $wet/$n';
+  }
+
+  @override
+  String get noRainVote => 'No rain';
+
+  @override
+  String get tapHint => 'Tap a column to see each source';
+
+  @override
+  String rainPct(Object v) {
+    return 'Rain $v%';
+  }
+
+  @override
+  String get measured => 'Measured';
+
+  @override
+  String get modelEstimate => 'Model';
+
+  @override
+  String get detailTable => 'All numbers by source';
+
+  @override
+  String sheetAt(Object when) {
+    return 'Forecasts for $when';
+  }
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get airHint =>
+      'Filled dots are station measurements, hollow dots are model estimates';
 }

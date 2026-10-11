@@ -90,5 +90,21 @@
  "srcOmCams": "CAMS (Copernicus)",
  "satDaily": "One image a day (today)",
  "satModel": "Map computed by a forecast model",
- "satLatest": "Latest"
+ "satLatest": "Latest",
+ "nowRange": "{n} forecasts range {range}",
+ "middleValue": "Middle value",
+ "notAvailable": "Not available",
+ "next24": "Next 24 hours",
+ "legendRange": "Range across sources",
+ "legendMid": "Middle value",
+ "rainVotes": "Rain {wet}/{n}",
+ "noRainVote": "No rain",
+ "tapHint": "Tap a column to see each source",
+ "rainPct": "Rain {v}%",
+ "measured": "Measured",
+ "modelEstimate": "Model",
+ "detailTable": "All numbers by source",
+ "sheetAt": "Forecasts for {when}",
+ "today": "Today",
+ "airHint": "Filled dots are station measurements, hollow dots are model estimates"
 }

@@ -51,10 +51,29 @@ List<Day> daysFromHours(List<Hour> hours, Duration offset) {
 bool isWet(int? pop, double? mm) => pop != null ? pop >= 50 : (mm != null && mm >= 0.5);
 bool isDry(int? pop, double? mm) => pop != null ? pop < 20 : (mm != null && mm == 0);
 
+/// 정렬된 값의 분위수(선형 보간).
+double quantile(List<double> sorted, double q) {
+  final pos = (sorted.length - 1) * q;
+  final lo = pos.floor(), hi = pos.ceil();
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+}
+
+/// 기관끼리 엇갈리나.
+/// 3곳 이하: 기온 차 3°C 초과, 또는 "비 온다"와 "안 온다"가 함께.
+/// 4곳 이상: 한 곳이 튀는 건 엇갈림이 아니다 — 가운데 절반이 2.5°C 넘게 벌어지거나,
+/// 비 예보가 30~70% 로 갈릴 때만.
 bool _diverges(List<double> temps, List<(int?, double?)> rain) {
   if (temps.length < 2) return false;
-  if (temps.reduce(max) - temps.reduce(min) > 3) return true;
-  return rain.any((r) => isWet(r.$1, r.$2)) && rain.any((r) => isDry(r.$1, r.$2));
+  if (temps.length < 4) {
+    if (temps.reduce(max) - temps.reduce(min) > 3) return true;
+    return rain.any((r) => isWet(r.$1, r.$2)) && rain.any((r) => isDry(r.$1, r.$2));
+  }
+  final s = [...temps]..sort();
+  if (quantile(s, 0.75) - quantile(s, 0.25) > 2.5) return true;
+  final known = rain.where((r) => r.$1 != null || r.$2 != null).toList();
+  if (known.length < 4) return false;
+  final wet = known.where((r) => isWet(r.$1, r.$2)).length / known.length;
+  return wet >= 0.3 && wet <= 0.7;
 }
 
 bool divergesHours(List<Hour?> cells) {
@@ -112,4 +131,66 @@ List<List<(String, Cyclone)>> groupCyclones(List<Result<List<Cyclone>>> rs) {
     }
   }
   return groups;
+}
+
+/// 가장 많은 기관이 고른 하늘(같으면 더 나쁜 날씨 쪽).
+Sky majoritySky(List<Sky> skies) {
+  final votes = <Sky, int>{};
+  for (final s in skies) {
+    votes[s] = (votes[s] ?? 0) + 1;
+  }
+  return votes.entries.reduce((a, b) => b.value > a.value || (b.value == a.value && b.key.index > a.key.index) ? b : a).key;
+}
+
+double median(List<double> xs) {
+  final s = [...xs]..sort();
+  final m = s.length ~/ 2;
+  return s.length.isOdd ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+/// 한 시각의 기관별 예보 퍼짐: 범위·가운데 값·비 예보 기관 수. cells 는 기온 낮은 순.
+class HourSpread {
+  final double min, max, median;
+  final int count, wet;
+  final bool diverges;
+  final List<(String, Hour)> cells;
+  const HourSpread(this.min, this.max, this.median, this.count, this.wet, this.diverges, this.cells);
+}
+
+HourSpread? hourSpread(List<Result<Forecast>> rs, DateTime t) {
+  final cells = [
+    for (final r in rs)
+      if (r.data == null ? null : hourAt(r.data!.hours, t) case final h?) (r.source, h)
+  ]..sort((a, b) => a.$2.tempC.compareTo(b.$2.tempC));
+  if (cells.isEmpty) return null;
+  final temps = [for (final c in cells) c.$2.tempC];
+  return HourSpread(temps.first, temps.last, median(temps), cells.length,
+      cells.where((c) => isWet(c.$2.pop, c.$2.mm)).length, divergesHours([for (final c in cells) c.$2]), cells);
+}
+
+/// 하루의 기관별 퍼짐: 최저기온 범위·최고기온 범위·가운데 값·비 확률 범위·가장 많은 기관이 고른 하늘.
+class DaySpread {
+  final double lowMin, lowMax, highMin, highMax, medLow, medHigh;
+  final int? popMin, popMax;
+  final int count;
+  final Sky sky;
+  final bool diverges;
+  final List<(String, Day)> cells;
+  const DaySpread(this.lowMin, this.lowMax, this.highMin, this.highMax, this.medLow, this.medHigh, this.popMin,
+      this.popMax, this.count, this.sky, this.diverges, this.cells);
+}
+
+DaySpread? daySpread(List<Result<Forecast>> rs, DateTime date) {
+  final cells = [
+    for (final r in rs)
+      if (r.data?.days.where((d) => d.date == date).firstOrNull case final d?) (r.source, d)
+  ]..sort((a, b) => a.$2.maxC.compareTo(b.$2.maxC));
+  if (cells.isEmpty) return null;
+  final lows = [for (final c in cells) c.$2.minC]..sort();
+  final highs = [for (final c in cells) c.$2.maxC];
+  final pops = [for (final c in cells) c.$2.pop].whereType<int>().toList()..sort();
+  final sky = majoritySky([for (final c in cells) c.$2.sky]);
+  return DaySpread(lows.first, lows.last, highs.first, highs.last, median(lows), median(highs),
+      pops.isEmpty ? null : pops.first, pops.isEmpty ? null : pops.last, cells.length, sky,
+      divergesDays([for (final c in cells) c.$2]), cells);
 }
