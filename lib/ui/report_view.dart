@@ -32,18 +32,18 @@ class ReportView extends StatelessWidget {
     final w = wx(context);
     final r = report;
     final nowUtc = (now ?? DateTime.now()).toUtc();
+    final v = verdict(r, ledger, nowUtc);
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 40),
       children: [
-        _Hero(r, fahrenheit, nowUtc),
-        if (verdict(r, ledger, nowUtc) case final v?)
-          _Section(l.verdictTitle, [_Verdict(v, r, fahrenheit)], info: (l.infoTitleVerdict, l.infoVerdict)),
+        _Hero(r, fahrenheit, nowUtc, v),
+        if (v != null) _Section(l.verdictTitle, [_Verdict(v, r, fahrenheit)], info: (l.infoTitleVerdict, l.infoVerdict)),
         _Section(l.next24, [_Hours(r, fahrenheit, nowUtc)], info: (l.infoTitleHours, l.infoHours)),
         _Section(l.dailyTitle, [_Days(r, fahrenheit, nowUtc)], info: (l.infoTitlePop, l.infoPop)),
-        _Section(l.airTitle, [_Air(r)], info: (l.infoTitleAir, l.infoAir)),
-        _Section(l.stormTitle, [_Storms(r)]),
         if (ledger case final led? when ranking(led).isNotEmpty)
           _Section(l.accuracyTitle, [_Accuracy(led, isKorea(r.place))], info: (l.infoTitleVerdict, l.infoVerdict)),
+        _Section(l.airTitle, [_Air(r)], info: (l.infoTitleAir, l.infoAir)),
+        _Section(l.stormTitle, [_Storms(r)]),
         if (onSatellite != null)
           Padding(
             padding: const EdgeInsets.only(top: 20),
@@ -121,10 +121,11 @@ class _InfoButton extends StatelessWidget {
 
 /// 맨 위: 지명, 기준 시각, 모든 기관 "지금 기온"의 가운데 값(크게)과 범위, 기관별 점.
 class _Hero extends StatelessWidget {
-  const _Hero(this.r, this.fahrenheit, this.nowUtc);
+  const _Hero(this.r, this.fahrenheit, this.nowUtc, this.v);
   final Report r;
   final bool fahrenheit;
   final DateTime nowUtc;
+  final Verdict? v; // 있으면 결론과 같은 값(잘 맞춘 곳에 무게)을 크게 보여 준다
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +143,7 @@ class _Hero extends StatelessWidget {
       for (final x in [...r.forecasts, ...r.air])
         if (x.fail != null) x.source: x.fail!,
     };
-    final mid = temps.isEmpty ? null : median(temps);
+    final mid = v?.tempNow ?? (temps.isEmpty ? null : median(temps));
     final sky = nows.isEmpty ? Sky.cloudy : majoritySky([for (final n in nows) n.$2.sky]);
     final night = isNightAt(nowUtc, r.offset);
     const fg = Colors.white;
@@ -153,6 +154,10 @@ class _Hero extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         gradient: LinearGradient(
             begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: heroGradient(sky, night: night)),
+        // 어두운 화면에선 밤하늘 카드가 바탕에 묻히지 않게 옅은 테두리
+        border: Theme.of(context).brightness == Brightness.dark
+            ? Border.all(color: Colors.white.withValues(alpha: 0.12))
+            : null,
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -176,7 +181,7 @@ class _Hero extends StatelessWidget {
                   child: Text(tempText(mid, fahrenheit),
                       style: const TextStyle(fontSize: 80, height: 1, color: fg, fontFeatures: tabular, letterSpacing: -2)),
                 ),
-                Text(l.middleValue, style: TextStyle(fontSize: 13, color: soft)),
+                Text(v?.weighted == true ? l.heroWeighted : l.middleValue, style: TextStyle(fontSize: 13, color: soft)),
               ]),
             ),
             WeatherIcon(sky, night: night, size: 112, animate: true),
@@ -637,6 +642,7 @@ class _Air extends StatelessWidget {
       );
     }
 
+    final failed = r.air.where((a) => a.fail != null).toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       if (ok.isNotEmpty) ...[
         scale(l.pm10, (a) => a.pm10, const [30, 80, 150], 200),
@@ -647,7 +653,7 @@ class _Air extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: Text(l.pmColumns, style: TextStyle(fontSize: 11, color: w.muted))),
       ],
-      for (final a in r.air)
+      for (final a in r.air.where((a) => a.data != null))
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 7),
           child: Row(children: [
@@ -676,6 +682,14 @@ class _Air extends StatelessWidget {
                 ),
             ],
           ]),
+        ),
+      if (failed.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(
+            '${l.notAvailable}: ${[for (final f in failed) '${sourceLabel(l, f.source)} ${failText(l, f.fail!)}'].join(', ')}',
+            style: TextStyle(fontSize: 12, color: w.muted),
+          ),
         ),
     ]);
   }
@@ -779,7 +793,6 @@ class _Verdict extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final w = wx(context);
-    final t = tempText(v.tempNow, fahrenheit);
     final conf = switch (v.tempConfidence) {
       Confidence.high => l.vConfHigh,
       Confidence.medium => l.vConfMedium,
@@ -789,9 +802,12 @@ class _Verdict extends StatelessWidget {
     final rows = <(IconData, Color, String, String)>[
       (
         Icons.thermostat,
-        w.ink,
-        v.weighted ? l.vNowWeighted(t) : l.vNow(t),
-        [conf, if (v.todayHigh != null) l.vTodayHigh(tempText(v.todayHigh!, fahrenheit))].join('. '),
+        v.tempConfidence == Confidence.low ? w.disagree : w.ink,
+        conf,
+        [
+          l.vMidHalf('${tempText(v.midLow, fahrenheit)} ~ ${tempText(v.midHigh, fahrenheit)}'),
+          if (v.todayHigh != null) l.vTodayHigh(tempText(v.todayHigh!, fahrenheit)),
+        ].join('. '),
       ),
       if (n > 0)
         (
@@ -802,13 +818,23 @@ class _Verdict extends StatelessWidget {
             RainCall.unlikely => l.vRainUnlikely,
             RainCall.split => l.vRainSplit,
           },
-          l.vRainVotes(n, wet),
+          wet == 0 ? l.vRainNone(n) : l.vRainVotes(n, wet),
         ),
       if (v.tomorrow case final d?)
         (
           Icons.event,
           w.ink,
-          l.vTomorrow('${tempText(d.medLow, fahrenheit)} ~ ${tempText(d.medHigh, fahrenheit)}'),
+          () {
+            final range = '${tempText(d.medLow, fahrenheit)} ~ ${tempText(d.medHigh, fahrenheit)}';
+            final tr = v.tomorrowRain;
+            if (tr == null || tr.$2 == 0) return l.vTomorrow(range);
+            final ratio = tr.$1 / tr.$2;
+            return ratio >= 0.6
+                ? l.vTomorrowLikely(range)
+                : ratio <= 0.2
+                    ? l.vTomorrowDry(range)
+                    : l.vTomorrowSplit(range);
+          }(),
           v.tomorrowRain == null ? '' : l.vTomorrowRain(v.tomorrowRain!.$1, v.tomorrowRain!.$2),
         ),
       if (v.best case (final id, final sc))

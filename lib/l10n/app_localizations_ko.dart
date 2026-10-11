@@ -460,23 +460,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get verdictTitle => '결론';
 
   @override
-  String vNow(Object t) {
-    return '지금 $t';
-  }
-
-  @override
-  String vNowWeighted(Object t) {
-    return '지금 $t (잘 맞춘 곳에 무게)';
-  }
-
-  @override
   String get vConfHigh => '기관들이 거의 같게 봐요';
 
   @override
   String get vConfMedium => '기관마다 조금씩 달라요';
 
   @override
-  String get vConfLow => '기관마다 많이 달라요. 아래 그래프에서 범위를 확인하세요';
+  String get vConfLow => '기관마다 많이 달라요';
 
   @override
   String vTodayHigh(Object t) {
@@ -555,4 +545,32 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get obsOwm => 'OpenWeather 현재값';
+
+  @override
+  String get heroWeighted => '잘 맞춘 곳에 무게를 둔 값';
+
+  @override
+  String vMidHalf(Object range) {
+    return '가운데 절반이 $range';
+  }
+
+  @override
+  String vRainNone(Object n) {
+    return '$n곳 모두 비가 없다고 봐요';
+  }
+
+  @override
+  String vTomorrowLikely(Object range) {
+    return '내일 $range, 비 올 가능성 높아요';
+  }
+
+  @override
+  String vTomorrowDry(Object range) {
+    return '내일 $range, 비 걱정 없어요';
+  }
+
+  @override
+  String vTomorrowSplit(Object range) {
+    return '내일 $range, 비 예보가 갈려요';
+  }
 }

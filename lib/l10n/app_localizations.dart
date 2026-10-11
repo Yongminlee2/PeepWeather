@@ -914,18 +914,6 @@ abstract class AppLocalizations {
   /// **'Bottom line'**
   String get verdictTitle;
 
-  /// No description provided for @vNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Now {t}'**
-  String vNow(Object t);
-
-  /// No description provided for @vNowWeighted.
-  ///
-  /// In en, this message translates to:
-  /// **'Now {t} (weighted by local accuracy)'**
-  String vNowWeighted(Object t);
-
   /// No description provided for @vConfHigh.
   ///
   /// In en, this message translates to:
@@ -941,7 +929,7 @@ abstract class AppLocalizations {
   /// No description provided for @vConfLow.
   ///
   /// In en, this message translates to:
-  /// **'Sources differ a lot. Check the range below'**
+  /// **'Sources differ a lot'**
   String get vConfLow;
 
   /// No description provided for @vTodayHigh.
@@ -1057,6 +1045,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OpenWeather current values'**
   String get obsOwm;
+
+  /// No description provided for @heroWeighted.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighted by local accuracy'**
+  String get heroWeighted;
+
+  /// No description provided for @vMidHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle half {range}'**
+  String vMidHalf(Object range);
+
+  /// No description provided for @vRainNone.
+  ///
+  /// In en, this message translates to:
+  /// **'All {n} sources expect no rain'**
+  String vRainNone(Object n);
+
+  /// No description provided for @vTomorrowLikely.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow {range}, rain likely'**
+  String vTomorrowLikely(Object range);
+
+  /// No description provided for @vTomorrowDry.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow {range}, no rain expected'**
+  String vTomorrowDry(Object range);
+
+  /// No description provided for @vTomorrowSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow {range}, rain forecasts split'**
+  String vTomorrowSplit(Object range);
 }
 
 class _AppLocalizationsDelegate

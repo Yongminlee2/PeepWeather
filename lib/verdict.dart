@@ -17,6 +17,8 @@ class Verdict {
     required this.tempNow,
     required this.weighted,
     required this.tempConfidence,
+    required this.midLow,
+    required this.midHigh,
     required this.rain,
     required this.rainVotes,
     required this.todayHigh,
@@ -28,6 +30,7 @@ class Verdict {
   final double tempNow;
   final bool weighted; // 잘 맞춘 기관에 무게를 둔 값인가
   final Confidence tempConfidence;
+  final double midLow, midHigh; // 가운데 절반 기관의 범위(3곳 이하면 전체 범위)
   final RainCall rain;
   final (int, int) rainVotes; // 12시간 안 (비 예보 기관 수, 전체)
   final double? todayHigh;
@@ -64,7 +67,8 @@ Verdict? verdict(Report r, Ledger? ledger, DateTime nowUtc) {
   final local = nowUtc.add(r.offset);
   final midnight = DateTime.utc(local.year, local.month, local.day + 1).subtract(r.offset);
   double? high;
-  for (var t = nowUtc; t.isBefore(midnight); t = t.add(const Duration(hours: 1))) {
+  // 저녁(18시 이후)엔 오늘이 얼마 안 남아 "오늘 최고"가 지금보다 낮게 나올 수 있어 뺀다
+  for (var t = nowUtc; local.hour < 18 && t.isBefore(midnight); t = t.add(const Duration(hours: 1))) {
     final s = hourSpread(r.forecasts, t);
     if (s != null) high = high == null ? s.median : max(high, s.median);
   }
@@ -74,10 +78,14 @@ Verdict? verdict(Report r, Ledger? ledger, DateTime nowUtc) {
   final pops = [for (final c in tomorrow?.cells ?? const <(String, Day)>[]) ?c.$2.pop];
 
   final rank = ledger == null ? const <(String, Score)>[] : ranking(ledger);
+  final sorted = nows.values.toList()..sort();
+  final quart = sorted.length >= 4;
   return Verdict(
     tempNow: w ?? median(nows.values.toList()),
     weighted: w != null,
     tempConfidence: confidenceOf(nows.values.toList()),
+    midLow: quart ? quantile(sorted, 0.25) : sorted.first,
+    midHigh: quart ? quantile(sorted, 0.75) : sorted.last,
     rain: ratio >= 0.6
         ? RainCall.likely
         : ratio <= 0.2

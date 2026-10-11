@@ -463,23 +463,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verdictTitle => 'Bottom line';
 
   @override
-  String vNow(Object t) {
-    return 'Now $t';
-  }
-
-  @override
-  String vNowWeighted(Object t) {
-    return 'Now $t (weighted by local accuracy)';
-  }
-
-  @override
   String get vConfHigh => 'Sources agree closely';
 
   @override
   String get vConfMedium => 'Sources differ a little';
 
   @override
-  String get vConfLow => 'Sources differ a lot. Check the range below';
+  String get vConfLow => 'Sources differ a lot';
 
   @override
   String vTodayHigh(Object t) {
@@ -560,4 +550,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get obsOwm => 'OpenWeather current values';
+
+  @override
+  String get heroWeighted => 'Weighted by local accuracy';
+
+  @override
+  String vMidHalf(Object range) {
+    return 'Middle half $range';
+  }
+
+  @override
+  String vRainNone(Object n) {
+    return 'All $n sources expect no rain';
+  }
+
+  @override
+  String vTomorrowLikely(Object range) {
+    return 'Tomorrow $range, rain likely';
+  }
+
+  @override
+  String vTomorrowDry(Object range) {
+    return 'Tomorrow $range, no rain expected';
+  }
+
+  @override
+  String vTomorrowSplit(Object range) {
+    return 'Tomorrow $range, rain forecasts split';
+  }
 }

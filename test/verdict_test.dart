@@ -66,4 +66,14 @@ void main() {
   test('no forecasts → no verdict', () {
     expect(verdict(rep([const Result('a', fail: Fail.noKey)]), null, now), isNull);
   });
+
+  test('middle half range is reported', () {
+    final v = verdict(rep([fc('a', 15), fc('b', 18), fc('c', 22), fc('d', 25)]), null, now)!;
+    expect([v.midLow, v.midHigh], [17.25, 22.75]);
+  });
+
+  test('no today-high in the evening (too little of today left)', () {
+    final evening = DateTime.utc(2026, 10, 11, 10); // 서울 19시
+    expect(verdict(rep([fc('a', 20), fc('b', 20), fc('c', 20)]), null, evening)!.todayHigh, isNull);
+  });
 }

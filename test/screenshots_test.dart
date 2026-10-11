@@ -18,6 +18,7 @@ import 'package:weather_compare/ui/home_screen.dart';
 import 'package:weather_compare/ui/report_view.dart';
 import 'package:weather_compare/ui/search_screen.dart';
 import 'package:weather_compare/ui/settings_screen.dart';
+import 'package:weather_compare/verify.dart';
 
 import 'repository_test.dart' show fakeNet;
 
@@ -79,15 +80,29 @@ void main() {
       report = await loadReport(Fetcher(fakeNet(), Directory.systemTemp.createTempSync('shot')), seoul,
           deviceOffset: const Duration(hours: 9));
     });
-    for (final (name, hour, dark) in [('report_day', 3, false), ('report_night', 12, false), ('report_dark', 12, true)]) {
+    // 며칠 쓴 뒤처럼 정확도 기록을 채운 모습도
+    final ledger = Ledger();
+    for (final (id, err, hits) in [('kma', 0.9, 6), ('om_ecmwf', 1.1, 6), ('om_icon', 1.4, 5), ('met', 1.6, 5), ('owm', 2.3, 4), ('om_gfs', 2.8, 4)]) {
+      final sc = Score();
+      for (var i = 0; i < 7; i++) {
+        sc.add(err, i < hits);
+      }
+      ledger.scores[id] = sc;
+    }
+    for (final (name, hour, dark, led) in [
+      ('report_day', 3, false, null),
+      ('report_night', 12, false, ledger),
+      ('report_dark', 12, true, ledger),
+    ]) {
       await shot(
           tester,
           name,
           Scaffold(
               appBar: AppBar(title: const Text('날씨 비교')),
-              body: ReportView(report: report, fahrenheit: false, now: DateTime.utc(2026, 10, 11, hour), onSatellite: () {})),
+              body: ReportView(
+                  report: report, fahrenheit: false, now: DateTime.utc(2026, 10, 11, hour), onSatellite: () {}, ledger: led)),
           dark: dark,
-          height: 5200);
+          height: 6400);
     }
     late Settings settings;
     late AppState noLoc;

@@ -136,11 +136,9 @@
  "heroRain": "12시간 안 비 예보 {n}곳 중 {wet}곳",
  "heroNoRain": "12시간 안 비 예보 없음",
  "verdictTitle": "결론",
- "vNow": "지금 {t}",
- "vNowWeighted": "지금 {t} (잘 맞춘 곳에 무게)",
  "vConfHigh": "기관들이 거의 같게 봐요",
  "vConfMedium": "기관마다 조금씩 달라요",
- "vConfLow": "기관마다 많이 달라요. 아래 그래프에서 범위를 확인하세요",
+ "vConfLow": "기관마다 많이 달라요",
  "vTodayHigh": "오늘 최고 {t} 안팎",
  "vRainLikely": "12시간 안 비 올 가능성이 높아요",
  "vRainUnlikely": "12시간 안 비 걱정은 없어요",
@@ -159,5 +157,11 @@
  "accuracyRain": "비 맞춤 {pct}%",
  "accuracyBasis": "하루쯤 전 예보를 {obs} 관측과 비교했어요",
  "obsKma": "기상청 관측소",
- "obsOwm": "OpenWeather 현재값"
+ "obsOwm": "OpenWeather 현재값",
+ "heroWeighted": "잘 맞춘 곳에 무게를 둔 값",
+ "vMidHalf": "가운데 절반이 {range}",
+ "vRainNone": "{n}곳 모두 비가 없다고 봐요",
+ "vTomorrowLikely": "내일 {range}, 비 올 가능성 높아요",
+ "vTomorrowDry": "내일 {range}, 비 걱정 없어요",
+ "vTomorrowSplit": "내일 {range}, 비 예보가 갈려요"
 }

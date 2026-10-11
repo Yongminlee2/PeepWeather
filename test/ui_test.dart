@@ -78,7 +78,7 @@ void main() {
     Navigator.of(tester.element(find.text('노르웨이 기상청').first)).pop();
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(find.text('오늘 한도 초과'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.scrollUntilVisible(find.textContaining('오늘 한도 초과'), 300, scrollable: find.byType(Scrollable).first);
     expect(find.text('나쁨'), findsWidgets);
 
     await tester.scrollUntilVisible(find.textContaining('Hagupit'), 300, scrollable: find.byType(Scrollable).first);
@@ -170,7 +170,7 @@ void main() {
     calm(tester);
     await pumpReport(tester);
     expect(find.text('결론'), findsOneWidget);
-    expect(find.textContaining('지금 '), findsWidgets);
+    expect(find.textContaining('가운데 절반이'), findsOneWidget);
     expect(find.textContaining('비교 자료를 모으는 중'), findsOneWidget);
     expect(find.textContaining(RegExp('비 (걱정|올 가능성|예보가 갈려요)')), findsOneWidget);
   });

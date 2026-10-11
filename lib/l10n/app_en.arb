@@ -136,11 +136,9 @@
  "heroRain": "Rain in 12 h: {wet} of {n}",
  "heroNoRain": "No rain expected in 12 h",
  "verdictTitle": "Bottom line",
- "vNow": "Now {t}",
- "vNowWeighted": "Now {t} (weighted by local accuracy)",
  "vConfHigh": "Sources agree closely",
  "vConfMedium": "Sources differ a little",
- "vConfLow": "Sources differ a lot. Check the range below",
+ "vConfLow": "Sources differ a lot",
  "vTodayHigh": "High today around {t}",
  "vRainLikely": "Rain is likely within 12 hours",
  "vRainUnlikely": "No rain expected within 12 hours",
@@ -159,5 +157,11 @@
  "accuracyRain": "rain right {pct}%",
  "accuracyBasis": "Day-ahead forecasts compared with {obs}",
  "obsKma": "KMA station observations",
- "obsOwm": "OpenWeather current values"
+ "obsOwm": "OpenWeather current values",
+ "heroWeighted": "Weighted by local accuracy",
+ "vMidHalf": "Middle half {range}",
+ "vRainNone": "All {n} sources expect no rain",
+ "vTomorrowLikely": "Tomorrow {range}, rain likely",
+ "vTomorrowDry": "Tomorrow {range}, no rain expected",
+ "vTomorrowSplit": "Tomorrow {range}, rain forecasts split"
 }
