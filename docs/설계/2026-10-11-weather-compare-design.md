@@ -32,6 +32,12 @@
 | OpenWeather 지도 타일 (clouds_new, precipitation_new) | 전 세계 | 구름·강수 분포 | 위와 같은 키 | 무료 요금제에 포함 |
 | 기상청 위성영상 조회서비스 (공공데이터포털) | 한반도 | 천리안 2A호 영상 | 공공데이터포털 키 | |
 
+| Open-Meteo 예보 (models= 10개) | 전 세계 | ECMWF·GFS·ICON·JMA·KMA·GEM·Météo-France·UKMO·CMA·BOM 모델별 시간별·7일 | 없음 | **비상업 무료**(CC BY 4.0 표기). 그 지역을 계산하지 않는 모델은 줄을 숨긴다 |
+| Open-Meteo 대기질 (CAMS) | 전 세계 | PM10·PM2.5 | 없음 | 비상업 무료, Copernicus 표기 |
+| EUMETSAT EUMETView WMS (mtg_fd:ir105_hrfi, mtg_fd:rgb_truecolour) | 유럽·아프리카·중동 | Meteosat-3세대 적외선·실사, 10분 | 없음 | 시간별 영상 무료·제한 없음(자료 정책 4절), © EUMETSAT 표기 |
+
+**2026-10-11 결정:** 사용자가 "상업적 용도가 아니다"라고 정해서 비상업 무료 출처(Open-Meteo, OpenAQ 라이선스 미표기 측정소)도 쓴다. 광고·유료화를 붙이면 이 출처들은 빼거나 유료로 바꿔야 한다. RainViewer 레이더는 "개인·교육용만"이라 넣지 않았다.
+
 **원칙:** 예보·미세먼지·태풍 모두 **세계 어디서든 최소 3곳**을 나란히 보여준다. 정리하면 다음과 같다.
 
 | 항목 | 전 세계 공통 | 한국에서 추가 | 미국에서 추가 |

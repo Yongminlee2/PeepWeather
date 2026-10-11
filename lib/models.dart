@@ -56,7 +56,8 @@ class Cyclone {
   const Cyclone(this.name, this.lat, this.lon, this.time, {this.windKt});
 }
 
-enum Fail { noKey, badKey, quota, network, parse, noStation }
+/// notCovered: 그 지역을 계산하지 않는 예보 모델 — 줄 자체를 숨긴다.
+enum Fail { noKey, badKey, quota, network, parse, noStation, notCovered }
 
 /// 출처 하나의 결과: 성공이면 data, 실패면 fail. asOf 는 자료를 받은 시각.
 class Result<T> {

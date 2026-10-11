@@ -89,4 +89,30 @@ void main() {
   test('no-station failure has its own words', () {
     expect(failText(lookupAppLocalizations(const Locale('ko')), Fail.noStation), '근처 측정소 없음');
   });
+
+  test('every source id has a human label', () {
+    final l = lookupAppLocalizations(const Locale('ko'));
+    for (final id in ['om_ecmwf', 'om_gfs', 'om_icon', 'om_jma', 'om_kma', 'om_gem', 'om_meteofrance', 'om_ukmo', 'om_cma', 'om_bom', 'om_cams']) {
+      expect(sourceLabel(l, id), isNot(id), reason: id);
+    }
+    expect(sourceLabel(l, 'om_ecmwf'), 'ECMWF(유럽)');
+  });
+
+  testWidgets('Open-Meteo credit appears once for many models', (tester) async {
+    final base = fakeReport();
+    final f = base.forecasts.first.data!;
+    final r = Report(base.place, [
+      Result('om_ecmwf', data: f, asOf: now),
+      Result('om_gfs', data: f, asOf: now),
+      Result('om_icon', data: f, asOf: now),
+    ], base.air, base.cyclones, base.offset);
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(WeatherApp(
+        locale: const Locale('ko'), home: Scaffold(body: ReportView(report: r, fahrenheit: false, now: now))));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.textContaining('Open-Meteo'), 300, scrollable: find.byType(Scrollable).first);
+    expect(find.textContaining('Open-Meteo'), findsOneWidget);
+  });
 }

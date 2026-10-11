@@ -8,6 +8,7 @@ import 'sources/kma.dart';
 import 'sources/met_norway.dart';
 import 'sources/nws.dart';
 import 'sources/openaq.dart';
+import 'sources/openmeteo.dart';
 import 'sources/openweather.dart';
 import 'sources/visual_crossing.dart';
 import 'sources/weatherapi.dart';
@@ -52,6 +53,13 @@ List<Source<Forecast>> forecastSources(Fetcher f, Place p, {bool background = fa
           return (parseWeatherApi(body), at);
         }),
         Source('vc', () => vcForecast(f, p)),
+        for (final MapEntry(key: model, value: id) in openMeteoModels.entries)
+          Source(id, () async {
+            final (body, at) = await openMeteoRaw(f, p); // 모델 10개가 요청 하나를 같이 쓴다
+            final fc = parseOpenMeteo(body, model);
+            if (fc == null) throw const FetchError(Fail.notCovered);
+            return (fc, at);
+          }),
       ],
       if (isKorea(p)) Source('kma', () => kmaForecast(f, p)),
       if (isUs(p)) Source('nws', () => nwsForecast(f, p)),
@@ -65,6 +73,7 @@ List<Source<Air>> airSources(Fetcher f, Place p, {bool background = false}) => [
           return (parseWeatherApiAir(body), at);
         }),
       Source('openaq', () => openAq(f, p)),
+      Source('om_cams', () => openMeteoAir(f, p)),
       if (isKorea(p)) Source('airkorea', () => airKorea(f, p)),
     ];
 
@@ -83,11 +92,12 @@ Duration guessOffset(double lon, Duration device) {
 }
 
 Future<Report> loadReport(Fetcher f, Place p, {bool background = false, Duration? deviceOffset}) async {
-  final (fc, air, cy) = await (
+  final (fcAll, air, cy) = await (
     Future.wait(forecastSources(f, p, background: background).map(runSource)),
     Future.wait(airSources(f, p, background: background).map(runSource)),
     Future.wait(cycloneSources(f, p).map(runSource)),
   ).wait;
+  final fc = fcAll.where((r) => r.fail != Fail.notCovered).toList();
   final offset = fc.map((r) => r.data?.utcOffset).whereType<Duration>().firstOrNull ??
       guessOffset(p.lon, deviceOffset ?? DateTime.now().timeZoneOffset);
   // 일별을 안 주는 출처(MET·OWM)는 장소 시간대로 시간별을 묶어 채운다.

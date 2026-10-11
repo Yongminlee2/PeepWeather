@@ -76,5 +76,16 @@
  "moreNow": "지금 앱",
  "moreGet": "받기",
  "alertsChannel": "날씨 알림",
- "failNoStation": "근처 측정소 없음"
+ "failNoStation": "근처 측정소 없음",
+ "srcOmEcmwf": "ECMWF(유럽)",
+ "srcOmGfs": "GFS(미국)",
+ "srcOmIcon": "ICON(독일)",
+ "srcOmJma": "JMA(일본)",
+ "srcOmKma": "KMA 모델(한국)",
+ "srcOmGem": "GEM(캐나다)",
+ "srcOmMeteofrance": "Météo-France(프랑스)",
+ "srcOmUkmo": "UKMO(영국)",
+ "srcOmCma": "CMA(중국)",
+ "srcOmBom": "BOM(호주)",
+ "srcOmCams": "CAMS(유럽 코페르니쿠스)"
 }

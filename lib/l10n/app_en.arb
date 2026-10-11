@@ -76,5 +76,16 @@
  "moreNow": "This app",
  "moreGet": "Get",
  "alertsChannel": "Weather alerts",
- "failNoStation": "No station nearby"
+ "failNoStation": "No station nearby",
+ "srcOmEcmwf": "ECMWF (Europe)",
+ "srcOmGfs": "GFS (US)",
+ "srcOmIcon": "ICON (Germany)",
+ "srcOmJma": "JMA (Japan)",
+ "srcOmKma": "KMA model (Korea)",
+ "srcOmGem": "GEM (Canada)",
+ "srcOmMeteofrance": "Météo-France",
+ "srcOmUkmo": "UKMO (UK)",
+ "srcOmCma": "CMA (China)",
+ "srcOmBom": "BOM (Australia)",
+ "srcOmCams": "CAMS (Copernicus)"
 }

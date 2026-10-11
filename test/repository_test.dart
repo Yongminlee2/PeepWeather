@@ -16,6 +16,10 @@ String fx(String name) => File('test/fixtures/$name').readAsStringSync();
 http.Client fakeNet({String? met}) => MockClient((r) async {
       final body = switch (r.url.host) {
         'api.met.no' => met ?? fx('met.json'),
+        // Open-Meteo 시험 자료는 서울 것뿐 — 다른 도시는 못 받은 것으로
+        'api.open-meteo.com' when r.url.queryParameters['latitude']!.startsWith('37.') => fx('openmeteo_real.json'),
+        'air-quality-api.open-meteo.com' when r.url.queryParameters['latitude']!.startsWith('37.') =>
+          fx('openmeteo_air_real.json'),
         'www.gdacs.org' => fx('gdacs.json'),
         'www.nhc.noaa.gov' => fx('nhc.json'),
         'www.metoc.navy.mil' => r.url.path.endsWith('.rss') ? fx('jtwc.rss') : fx('jtwc_warn.txt'),
@@ -44,7 +48,7 @@ void main() {
     for (final s in ['owm', 'weatherapi', 'vc', 'kma']) {
       expect(fc[s], Fail.noKey, reason: s);
     }
-    expect(fails(r.air).values.toSet(), {Fail.noKey});
+    expect(fails(r.air), {'owm': Fail.noKey, 'weatherapi': Fail.noKey, 'openaq': Fail.noKey, 'om_cams': null, 'airkorea': Fail.noKey});
     final cy = fails(r.cyclones);
     expect([cy['gdacs'], cy['nhc'], cy['jtwc']], [null, null, null]);
     expect(cy['kma_typhoon'], Fail.noKey);
@@ -59,18 +63,19 @@ void main() {
   test('sources depend on country', () {
     final f = Fetcher(fakeNet(), dir);
     List<String> names<T>(List<Source<T>> s) => s.map((e) => e.name).toList();
-    expect(names(forecastSources(f, seoul)), ['met', 'owm', 'weatherapi', 'vc', 'kma']);
-    expect(names(airSources(f, seoul)), ['owm', 'weatherapi', 'openaq', 'airkorea']);
+    const om = ['om_ecmwf', 'om_gfs', 'om_icon', 'om_jma', 'om_kma', 'om_gem', 'om_meteofrance', 'om_ukmo', 'om_cma', 'om_bom'];
+    expect(names(forecastSources(f, seoul)), ['met', 'owm', 'weatherapi', 'vc', ...om, 'kma']);
+    expect(names(airSources(f, seoul)), ['owm', 'weatherapi', 'openaq', 'om_cams', 'airkorea']);
     expect(names(cycloneSources(f, seoul)), ['gdacs', 'nhc', 'jtwc', 'kma_typhoon']);
-    expect(names(forecastSources(f, ny)), ['met', 'owm', 'weatherapi', 'vc', 'nws']);
-    expect(names(forecastSources(f, paris)), ['met', 'owm', 'weatherapi', 'vc']);
-    expect(names(airSources(f, paris)), ['owm', 'weatherapi', 'openaq']);
+    expect(names(forecastSources(f, ny)), ['met', 'owm', 'weatherapi', 'vc', ...om, 'nws']);
+    expect(names(forecastSources(f, paris)), ['met', 'owm', 'weatherapi', 'vc', ...om]);
+    expect(names(airSources(f, paris)), ['owm', 'weatherapi', 'openaq', 'om_cams']);
   });
 
   test('background skips small-quota sources', () {
     final f = Fetcher(fakeNet(), dir);
     expect(forecastSources(f, ny, background: true).map((e) => e.name), ['met', 'owm', 'nws']);
-    expect(airSources(f, seoul, background: true).map((e) => e.name), ['owm', 'openaq', 'airkorea']);
+    expect(airSources(f, seoul, background: true).map((e) => e.name), ['owm', 'openaq', 'om_cams', 'airkorea']);
   });
 
   test('offset comes from a source and fills missing daily rows', () async {
@@ -106,5 +111,15 @@ void main() {
     expect([t.fahrenheit, t.alertAir], [true, false]);
     expect(t.places.single.name, 'Paris');
     expect(t.lastPos!.country, 'KR');
+  });
+
+  test('Open-Meteo models without data here are dropped, the rest shown', () async {
+    final r = await loadReport(Fetcher(fakeNet(), dir), seoul, deviceOffset: const Duration(hours: 9));
+    final ids = r.forecasts.map((x) => x.source).toList();
+    expect(ids, containsAll(['om_ecmwf', 'om_gfs', 'om_icon', 'om_jma', 'om_gem', 'om_meteofrance', 'om_ukmo', 'om_cma']));
+    expect(ids, isNot(contains('om_kma')));
+    expect(ids, isNot(contains('om_bom')));
+    expect(r.forecasts.firstWhere((x) => x.source == 'om_ecmwf').ok, isTrue);
+    expect(r.air.firstWhere((x) => x.source == 'om_cams').data!.pm25, 35.9);
   });
 }

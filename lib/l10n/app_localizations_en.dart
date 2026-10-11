@@ -258,4 +258,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failNoStation => 'No station nearby';
+
+  @override
+  String get srcOmEcmwf => 'ECMWF (Europe)';
+
+  @override
+  String get srcOmGfs => 'GFS (US)';
+
+  @override
+  String get srcOmIcon => 'ICON (Germany)';
+
+  @override
+  String get srcOmJma => 'JMA (Japan)';
+
+  @override
+  String get srcOmKma => 'KMA model (Korea)';
+
+  @override
+  String get srcOmGem => 'GEM (Canada)';
+
+  @override
+  String get srcOmMeteofrance => 'Météo-France';
+
+  @override
+  String get srcOmUkmo => 'UKMO (UK)';
+
+  @override
+  String get srcOmCma => 'CMA (China)';
+
+  @override
+  String get srcOmBom => 'BOM (Australia)';
+
+  @override
+  String get srcOmCams => 'CAMS (Copernicus)';
 }

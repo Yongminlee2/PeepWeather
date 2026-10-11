@@ -559,6 +559,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No station nearby'**
   String get failNoStation;
+
+  /// No description provided for @srcOmEcmwf.
+  ///
+  /// In en, this message translates to:
+  /// **'ECMWF (Europe)'**
+  String get srcOmEcmwf;
+
+  /// No description provided for @srcOmGfs.
+  ///
+  /// In en, this message translates to:
+  /// **'GFS (US)'**
+  String get srcOmGfs;
+
+  /// No description provided for @srcOmIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'ICON (Germany)'**
+  String get srcOmIcon;
+
+  /// No description provided for @srcOmJma.
+  ///
+  /// In en, this message translates to:
+  /// **'JMA (Japan)'**
+  String get srcOmJma;
+
+  /// No description provided for @srcOmKma.
+  ///
+  /// In en, this message translates to:
+  /// **'KMA model (Korea)'**
+  String get srcOmKma;
+
+  /// No description provided for @srcOmGem.
+  ///
+  /// In en, this message translates to:
+  /// **'GEM (Canada)'**
+  String get srcOmGem;
+
+  /// No description provided for @srcOmMeteofrance.
+  ///
+  /// In en, this message translates to:
+  /// **'Météo-France'**
+  String get srcOmMeteofrance;
+
+  /// No description provided for @srcOmUkmo.
+  ///
+  /// In en, this message translates to:
+  /// **'UKMO (UK)'**
+  String get srcOmUkmo;
+
+  /// No description provided for @srcOmCma.
+  ///
+  /// In en, this message translates to:
+  /// **'CMA (China)'**
+  String get srcOmCma;
+
+  /// No description provided for @srcOmBom.
+  ///
+  /// In en, this message translates to:
+  /// **'BOM (Australia)'**
+  String get srcOmBom;
+
+  /// No description provided for @srcOmCams.
+  ///
+  /// In en, this message translates to:
+  /// **'CAMS (Copernicus)'**
+  String get srcOmCams;
 }
 
 class _AppLocalizationsDelegate

@@ -258,4 +258,37 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get failNoStation => '근처 측정소 없음';
+
+  @override
+  String get srcOmEcmwf => 'ECMWF(유럽)';
+
+  @override
+  String get srcOmGfs => 'GFS(미국)';
+
+  @override
+  String get srcOmIcon => 'ICON(독일)';
+
+  @override
+  String get srcOmJma => 'JMA(일본)';
+
+  @override
+  String get srcOmKma => 'KMA 모델(한국)';
+
+  @override
+  String get srcOmGem => 'GEM(캐나다)';
+
+  @override
+  String get srcOmMeteofrance => 'Météo-France(프랑스)';
+
+  @override
+  String get srcOmUkmo => 'UKMO(영국)';
+
+  @override
+  String get srcOmCma => 'CMA(중국)';
+
+  @override
+  String get srcOmBom => 'BOM(호주)';
+
+  @override
+  String get srcOmCams => 'CAMS(유럽 코페르니쿠스)';
 }

@@ -14,6 +14,7 @@ String failText(AppLocalizations l, Fail f) => switch (f) {
       Fail.network => l.failNetwork,
       Fail.parse => l.failParse,
       Fail.noStation => l.failNoStation,
+      Fail.notCovered => l.failParse, // 화면에 나오지 않음(저장소가 줄을 뺀다)
     };
 
 String sourceLabel(AppLocalizations l, String id) => switch (id) {
@@ -29,6 +30,17 @@ String sourceLabel(AppLocalizations l, String id) => switch (id) {
       'nhc' => l.srcNhc,
       'jtwc' => l.srcJtwc,
       'kma_typhoon' => l.srcKmaTyphoon,
+      'om_ecmwf' => l.srcOmEcmwf,
+      'om_gfs' => l.srcOmGfs,
+      'om_icon' => l.srcOmIcon,
+      'om_jma' => l.srcOmJma,
+      'om_kma' => l.srcOmKma,
+      'om_gem' => l.srcOmGem,
+      'om_meteofrance' => l.srcOmMeteofrance,
+      'om_ukmo' => l.srcOmUkmo,
+      'om_cma' => l.srcOmCma,
+      'om_bom' => l.srcOmBom,
+      'om_cams' => l.srcOmCams,
       _ => id,
     };
 
@@ -47,7 +59,13 @@ const attributions = <String, (String, String)>{
   'jtwc': ('Joint Typhoon Warning Center', 'https://www.metoc.navy.mil/jtwc/jtwc.html'),
   'kma_typhoon': ('기상청 태풍정보 (공공데이터포털)', 'https://www.data.go.kr'),
   'gibs': ('Imagery: NASA GIBS / EOSDIS', 'https://earthdata.nasa.gov/gibs'),
+  'openmeteo': ('Weather data by Open-Meteo.com (CC BY 4.0)', 'https://open-meteo.com'),
+  'om_cams': ('Contains modified Copernicus Atmosphere Monitoring Service information', 'https://atmosphere.copernicus.eu'),
+  'eumetsat': ('Satellite imagery © EUMETSAT', 'https://www.eumetsat.int'),
 };
+
+/// 출처 id → 표기 키. Open-Meteo 모델 여러 개는 표기 하나로 묶는다.
+String attributionKey(String id) => id.startsWith('om_') && id != 'om_cams' ? 'openmeteo' : id;
 
 IconData skyIcon(Sky s) => switch (s) {
       Sky.clear => Icons.wb_sunny,

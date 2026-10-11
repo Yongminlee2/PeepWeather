@@ -42,7 +42,10 @@ class ReportView extends StatelessWidget {
             child: FilledButton.icon(onPressed: onSatellite, icon: const Icon(Icons.satellite_alt), label: Text(l.satellite)),
           ),
         _Section(l.attribution, [
-          for (final id in {...r.forecasts.map((x) => x.source), ...r.air.map((x) => x.source), ...r.cyclones.map((x) => x.source), 'gibs'})
+          for (final id in {
+            for (final x in [...r.forecasts, ...r.air, ...r.cyclones]) attributionKey(x.source),
+            'gibs',
+          })
             if (attributions[id] case (final text, final url))
               InkWell(
                 onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),

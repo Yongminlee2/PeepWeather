@@ -36,11 +36,11 @@ void main() {
     expect(find.textContaining('NASA GIBS'), findsOneWidget);
   });
 
-  testWidgets('Paris starts on true color and has no KMA chip', (tester) async {
+  testWidgets('Paris starts on Meteosat infrared and has no KMA chip', (tester) async {
     await pump(tester, const Place('Paris', 'FR', 48.85, 2.35));
     expect(find.text('천리안 2A'), findsNothing);
-    expect(find.text('적외선'), findsNothing);
-    expect(chip(tester, '실사(하루)').selected, isTrue);
+    expect(chip(tester, '적외선').selected, isTrue);
+    expect(find.textContaining('EUMETSAT'), findsOneWidget);
   });
 
   testWidgets('model layers without key explain setup', (tester) async {

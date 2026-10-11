@@ -19,13 +19,6 @@ void main() {
     expect(satLayersFor(const Place('NY', 'US', 40.7, -74))[1].tileUrl, contains('GOES-East_ABI_GeoColor'));
   });
 
-  test('Europe has no geostationary layer, true color first, no KMA', () {
-    final k = kinds(const Place('Paris', 'FR', 48.85, 2.35));
-    expect(k.first, SatKind.trueColor);
-    expect(k, isNot(contains(SatKind.infrared)));
-    expect(k, isNot(contains(SatKind.kma)));
-  });
-
   test('frames go back from now minus 80 min in 10 min steps, oldest first', () {
     expect(satFrames(DateTime.utc(2026, 10, 11, 8, 7), count: 3),
         [DateTime.utc(2026, 10, 11, 6, 20), DateTime.utc(2026, 10, 11, 6, 30), DateTime.utc(2026, 10, 11, 6, 40)]);
@@ -46,5 +39,20 @@ void main() {
 
   test('KMA image url is upgraded to https (Android blocks cleartext)', () {
     expect(parseKmaSat(File('test/fixtures/kma_sat.json').readAsStringSync()).scheme, 'https');
+  });
+
+  test('Europe gets EUMETSAT Meteosat infrared and true colour first', () {
+    final ls = satLayersFor(const Place('Paris', 'FR', 48.85, 2.35));
+    expect(ls.map((l) => l.kind).take(3), [SatKind.infrared, SatKind.visible, SatKind.trueColor]);
+    expect(ls[0].wmsLayer, 'mtg_fd:ir105_hrfi');
+    expect(ls[1].wmsLayer, 'mtg_fd:rgb_truecolour');
+    expect(ls[0].animated, isTrue);
+    expect(ls[0].credit, contains('EUMETSAT'));
+    expect(satLayersFor(const Place('서울', 'KR', 37.57, 126.98)).first.wmsLayer, isNull);
+  });
+
+  test('frames honour a per-layer lag', () {
+    expect(satFrames(DateTime.utc(2026, 10, 11, 8, 7), count: 2, lag: const Duration(minutes: 20)),
+        [DateTime.utc(2026, 10, 11, 7, 30), DateTime.utc(2026, 10, 11, 7, 40)]);
   });
 }

@@ -26,7 +26,8 @@ class SatelliteScreen extends StatefulWidget {
 class _SatelliteScreenState extends State<SatelliteScreen> {
   late final List<SatLayer> _layers = satLayersFor(widget.place);
   late SatLayer _sel = _layers.first;
-  late final List<DateTime> _frames = satFrames((widget.now ?? DateTime.now()).toUtc());
+  // 출처마다 올라오는 지연이 달라(NASA 약 80분, EUMETSAT 약 20분) 고른 레이어 기준으로
+  List<DateTime> get _frames => satFrames((widget.now ?? DateTime.now()).toUtc(), lag: _sel.lag);
   int? _frame; // null = 가장 최근(default)
   Timer? _timer;
   Future<Uri>? _kma;
@@ -71,7 +72,7 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
         ? '기상청 천리안 2A호 (공공데이터포털)'
         : owm
             ? attributions['owm']!.$1
-            : attributions['gibs']!.$1;
+            : _sel.credit;
     return Scaffold(
       appBar: AppBar(title: Text(l.satellite)),
       body: Column(children: [
@@ -124,7 +125,9 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
       );
     }
     if (owm && Keys.owm.isEmpty) return Center(child: Text(l.failNoKey));
-    final url = _sel.urlAt(_frame == null ? null : _frames[_frame!]);
+    final t = _frame == null ? null : _frames[_frame!];
+    final url = _sel.urlAt(t);
+    final wms = _sel.wmsLayer;
     return Stack(children: [
       FlutterMap(
         options: MapOptions(
@@ -136,8 +139,13 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
         ),
         children: [
           TileLayer(
-              key: ValueKey(url),
-              urlTemplate: url,
+              key: ValueKey('$wms|$url|$t'),
+              urlTemplate: wms == null ? url : null,
+              wmsOptions: wms == null
+                  ? null
+                  : WMSTileLayerOptions(baseUrl: eumetsatWms, layers: [wms], otherParameters: {
+                      if (t != null) 'time': '${t.toIso8601String().substring(0, 19)}Z',
+                    }),
               maxNativeZoom: _sel.maxZoom,
               userAgentPackageName: 'com.peep.weather',
               tileDisplay: const TileDisplay.instantaneous()),
