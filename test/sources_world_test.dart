@@ -159,4 +159,19 @@ void main() {
       expect(ps.first.name, startsWith('파리'));
     });
   });
+
+  group('WeatherAPI real response (2026-10-11, Seoul)', () {
+    test('forecast parses with 3 days, 72 hours and +9 offset', () {
+      final f = parseWeatherApi(fx('weatherapi_real.json'));
+      expect(f.days.length, 3);
+      expect(f.hours.length, 72);
+      expect(f.utcOffset, const Duration(hours: 9));
+      expect(f.now!.tempC, 25.2);
+      expect(f.now!.sky, Sky.cloudy); // 1009 Overcast
+    });
+    test('air parses', () {
+      final a = parseWeatherApiAir(fx('weatherapi_real.json'));
+      expect([a.pm10, a.pm25], [29.9, 29.4]);
+    });
+  });
 }
