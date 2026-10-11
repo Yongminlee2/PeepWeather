@@ -1,26 +1,21 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 
 import 'app_state.dart';
-import 'fetcher.dart';
+import 'background.dart';
 import 'l10n/app_localizations.dart';
 import 'settings.dart';
 import 'ui/home_screen.dart';
 import 'ui/satellite_screen.dart';
 
-Future<Fetcher> makeFetcher() async =>
-    Fetcher(http.Client(), Directory('${(await getApplicationSupportDirectory()).path}/responses'));
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final state = AppState(await Settings.load(), await makeFetcher());
+  scheduleChecks().ignore(); // 알림 등록 실패가 앱 시작을 막지 않게
   runApp(WeatherApp(
       home: HomeScreen(
           state: state,
+          afterLocate: () => askNotificationPermission().ignore(),
           onSatellite: (context, p) => Navigator.of(context)
               .push(MaterialPageRoute(builder: (_) => SatelliteScreen(place: p, fetcher: state.fetcher))))));
 }

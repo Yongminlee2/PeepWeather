@@ -10,8 +10,9 @@ import 'settings_screen.dart';
 
 /// 현재 위치 + 저장 도시를 옆으로 넘겨 본다.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.state, this.onSatellite});
+  const HomeScreen({super.key, required this.state, this.onSatellite, this.afterLocate});
   final AppState state;
+  final VoidCallback? afterLocate; // 위치 권한 창 다음에 할 일(알림 권한 요청)
   final void Function(BuildContext context, Place p)? onSatellite;
 
   @override
@@ -32,7 +33,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _started = true;
     final l = AppLocalizations.of(context);
     final lang = Localizations.localeOf(context).languageCode;
-    st.locate(lang, l.currentLocation).then((_) => _load(0));
+    st.locate(lang, l.currentLocation).then((_) {
+      widget.afterLocate?.call();
+      _load(0);
+    });
   }
 
   void _load(int i) {
