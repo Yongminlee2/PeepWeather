@@ -83,7 +83,8 @@ Uri parseKmaSat(String body) {
   final urls = RegExp(r'https?://[^\s,\]"]+\.png').allMatches(body).map((m) => m[0]!).toList()..sort();
   if (urls.isEmpty) throw const FormatException('no image');
   // 안드로이드 9+ 는 http 를 막는다 — 기상청 이미지 서버는 https 도 받는다
-  return Uri.parse(urls.last).replace(scheme: 'https');
+  // 목록은 썸네일(.thn.png)만 주지만 같은 자리에 원본(.srv.png)이 있다
+  return Uri.parse(urls.last.replaceFirst('.thn.png', '.srv.png')).replace(scheme: 'https');
 }
 
 Future<Uri> kmaSatImage(Fetcher f) async {
