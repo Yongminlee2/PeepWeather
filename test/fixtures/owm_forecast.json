@@ -1,0 +1,1 @@
+{"cod": "200", "cnt": 3, "list": [{"dt": 1791709200, "main": {"temp": 21.5}, "weather": [{"id": 500, "main": "Rain"}], "pop": 0.62, "rain": {"3h": 1.2}}, {"dt": 1791720000, "main": {"temp": 18.0}, "weather": [{"id": 803}], "pop": 0.1}, {"dt": 1791730800, "main": {"temp": 16.2}, "weather": [{"id": 800}], "pop": 0}], "city": {"name": "Seoul", "country": "KR", "timezone": 32400}}
