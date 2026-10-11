@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your approximate location is used to show the weather where you are.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Weather Compare</string>
 	<key>CFBundleExecutable</key>

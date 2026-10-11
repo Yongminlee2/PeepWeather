@@ -1,9 +1,24 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
+import 'app_state.dart';
+import 'fetcher.dart';
 import 'l10n/app_localizations.dart';
+import 'settings.dart';
+import 'ui/home_screen.dart';
 
-void main() => runApp(const WeatherApp());
+Future<Fetcher> makeFetcher() async =>
+    Fetcher(http.Client(), Directory('${(await getApplicationSupportDirectory()).path}/responses'));
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final state = AppState(await Settings.load(), await makeFetcher());
+  runApp(WeatherApp(home: HomeScreen(state: state)));
+}
 
 class WeatherApp extends StatelessWidget {
   const WeatherApp({super.key, this.home, this.locale});

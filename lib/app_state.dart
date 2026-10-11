@@ -39,7 +39,7 @@ class AppState extends ChangeNotifier {
   final _reports = <String, Report>{};
   final _loading = <String>{};
 
-  List<Place> get places => [if (current != null) current!, ...settings.places];
+  List<Place> get places => [?current, ...settings.places];
   Report? reportFor(Place p) => _reports[placeKey(p)];
   bool isLoading(Place p) => _loading.contains(placeKey(p));
 
