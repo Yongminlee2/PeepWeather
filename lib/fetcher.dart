@@ -26,9 +26,18 @@ class Fetcher {
   final http.Client client;
   final Directory dir;
   final DateTime Function() _now;
+  final _inFlight = <String, Future<Fetched>>{};
 
-  Future<Fetched> get(Uri url,
-      {Duration maxAge = const Duration(minutes: 30), Map<String, String>? headers}) async {
+  /// 같은 주소를 동시에 부르면 요청 하나를 같이 기다린다.
+  Future<Fetched> get(Uri url, {Duration maxAge = const Duration(minutes: 30), Map<String, String>? headers}) {
+    final key = url.toString();
+    // whenComplete 콜백이 Future 를 돌려주면 그걸 기다리므로, 지운 값(자기 자신)을 돌려주지 않게 블록으로.
+    return _inFlight.putIfAbsent(key, () => _get(url, maxAge, headers).whenComplete(() {
+          _inFlight.remove(key);
+        }));
+  }
+
+  Future<Fetched> _get(Uri url, Duration maxAge, Map<String, String>? headers) async {
     final file = File('${dir.path}/${_hash(url.toString())}.txt');
     final cached = await _read(file);
     if (cached != null && _now().difference(cached.at) < maxAge) return cached;

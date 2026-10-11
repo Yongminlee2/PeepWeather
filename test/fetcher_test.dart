@@ -81,4 +81,16 @@ void main() {
     expect((await f.get(url)).body, '서울');
     expect((await f.get(url)).body, '서울');
   });
+
+  test('concurrent requests for the same url share one call', () async {
+    var calls = 0;
+    final f = Fetcher(MockClient((_) async {
+      calls++;
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      return http.Response('one', 200);
+    }), dir, now: () => now);
+    final rs = await Future.wait([f.get(url), f.get(url)]);
+    expect(rs.map((r) => r.body), ['one', 'one']);
+    expect(calls, 1);
+  });
 }
