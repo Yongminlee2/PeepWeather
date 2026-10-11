@@ -32,6 +32,11 @@ class SettingsScreen extends StatelessWidget {
           SwitchListTile(
               title: Text(l.alertStorm), value: settings.alertStorm, onChanged: (v) => settings.update((s) => s.alertStorm = v)),
           header(l.savedPlaces),
+          if (settings.places.isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: Text(l.noPlaces, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            ),
           for (final p in settings.places)
             ListTile(
               title: Text(p.name),

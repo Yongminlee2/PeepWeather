@@ -64,7 +64,12 @@ class _SearchScreenState extends State<SearchScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _error != null
               ? Center(child: Text(_error!))
-              : ListView(children: [
+              : _results == null
+                  ? Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(l.searchIntro, style: const TextStyle(fontSize: 15, height: 1.6)),
+                    )
+                  : ListView(children: [
                   for (final p in _results ?? const <Place>[])
                     ListTile(
                       leading: const Icon(Icons.location_city),

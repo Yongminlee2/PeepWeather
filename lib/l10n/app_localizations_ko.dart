@@ -412,4 +412,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get close => '닫기';
+
+  @override
+  String get searchIntro =>
+      '도시 이름을 입력하고 키보드의 검색 단추를 누르세요.\n예: 부산, 제주, 도쿄, Paris';
+
+  @override
+  String get noPlaces => '아직 없어요. 첫 화면 오른쪽 위 돋보기로 도시를 추가하면 옆으로 넘겨 볼 수 있어요.';
 }

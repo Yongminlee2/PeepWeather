@@ -241,13 +241,13 @@ void _sheet(BuildContext context, String title, List<Widget> rows) => showModalB
       ),
     );
 
-Widget _sourceRow(BuildContext context, String id, Sky sky, String main, String? sub) {
+Widget _sourceRow(BuildContext context, String id, Sky sky, String main, String? sub, {bool night = false}) {
   final w = wx(context);
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 7),
     child: Row(children: [
       Expanded(child: Text(sourceLabel(AppLocalizations.of(context), id), style: TextStyle(color: w.ink))),
-      WeatherIcon(sky, size: 30),
+      WeatherIcon(sky, night: night, size: 30),
       SizedBox(
           width: 92,
           child: Text(main, textAlign: TextAlign.end, style: TextStyle(color: w.ink, fontFeatures: tabular, fontSize: 15))),
@@ -287,7 +287,8 @@ class _Hours extends StatelessWidget {
       _sheet(context, l.sheetAt(localTime(slots[i], r.offset, loc, 'M/d HH:mm')), [
         for (final (id, h) in s.cells)
           _sourceRow(context, id, h.sky, tempText(h.tempC, fahrenheit),
-              h.pop != null ? '${h.pop}%' : (h.mm != null && h.mm! > 0 ? '${h.mm!.toStringAsFixed(1)}mm' : null)),
+              h.pop != null ? '${h.pop}%' : (h.mm != null && h.mm! > 0 ? '${h.mm!.toStringAsFixed(1)}mm' : null),
+              night: isNightAt(slots[i], r.offset)),
       ]);
     }
 

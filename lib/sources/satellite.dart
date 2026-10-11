@@ -7,8 +7,8 @@ enum SatKind { infrared, visible, trueColor, owmClouds, owmPrecip, kma }
 
 const _gibs = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best';
 
-/// NASA GIBS 해안선·국경 겹침 레이어.
-const coastlinesUrl = '$_gibs/Reference_Features_15m/default/default/GoogleMapsCompatible_Level13/{z}/{y}/{x}.png';
+/// NASA GIBS 해안선 겹침 레이어(Reference_Features 는 이 축척에서 비어 있어서 Coastlines).
+const coastlinesUrl = '$_gibs/Coastlines_15m/default/default/GoogleMapsCompatible_Level13/{z}/{y}/{x}.png';
 
 const _gibsCredit = 'Imagery: NASA GIBS / EOSDIS';
 const eumetsatWms = 'https://view.eumetsat.int/geoserver/wms?';

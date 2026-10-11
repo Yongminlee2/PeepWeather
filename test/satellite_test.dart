@@ -63,4 +63,8 @@ void main() {
   test('map layers loop 2 hours in 12 frames (memory on small phones)', () {
     expect(satFrames(DateTime.utc(2026, 10, 11, 8, 7)).length, 12);
   });
+
+  test('coastlines come from the layer that actually has lines', () {
+    expect(coastlinesUrl, contains('Coastlines_15m'));
+  });
 }

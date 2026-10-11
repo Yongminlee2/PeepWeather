@@ -835,6 +835,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get close;
+
+  /// No description provided for @searchIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a city name and press search on the keyboard.\nFor example: Busan, Tokyo, Paris'**
+  String get searchIntro;
+
+  /// No description provided for @noPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'None yet. Add a city with the search button on the main screen, then swipe between them.'**
+  String get noPlaces;
 }
 
 class _AppLocalizationsDelegate

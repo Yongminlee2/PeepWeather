@@ -413,4 +413,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get close => 'Close';
+
+  @override
+  String get searchIntro =>
+      'Type a city name and press search on the keyboard.\nFor example: Busan, Tokyo, Paris';
+
+  @override
+  String get noPlaces =>
+      'None yet. Add a city with the search button on the main screen, then swipe between them.';
 }

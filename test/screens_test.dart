@@ -72,4 +72,21 @@ void main() {
     await tester.pump();
     expect(find.text('설정 필요'), findsOneWidget);
   });
+
+  testWidgets('search shows how to use it before typing', (tester) async {
+    late AppState st;
+    await tester.runAsync(() async {
+      st = AppState(await Settings.load(), Fetcher(fakeNet(), dir), locator: () async => null);
+    });
+    await pump(tester, SearchScreen(state: st));
+    expect(find.textContaining('도시 이름을 입력'), findsOneWidget);
+  });
+
+  testWidgets('settings explains how to add a city when none are saved', (tester) async {
+    late Settings s;
+    await tester.runAsync(() async => s = await Settings.load());
+    await pump(tester, SettingsScreen(settings: s));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('돋보기'), findsOneWidget);
+  });
 }

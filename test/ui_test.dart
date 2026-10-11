@@ -5,6 +5,7 @@ import 'package:weather_compare/models.dart';
 import 'package:weather_compare/repository.dart';
 import 'package:weather_compare/ui/format.dart';
 import 'package:weather_compare/ui/report_view.dart';
+import 'package:weather_compare/ui/weather_icon.dart';
 import 'package:weather_compare/l10n/app_localizations.dart';
 
 final now = DateTime.utc(2026, 10, 11, 1, 20); // 서울 10:20
@@ -134,5 +135,17 @@ void main() {
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.textContaining('Open-Meteo'), 300, scrollable: find.byType(Scrollable).first);
     expect(find.textContaining('Open-Meteo'), findsOneWidget);
+  });
+
+  testWidgets('popup rows use night icons for night hours', (tester) async {
+    calm(tester);
+    await pumpReport(tester);
+    // 슬롯: 서울 12,15,18,21,0,3,6,9시 → 네 번째(21시)는 밤
+    final cells = find.textContaining(RegExp(r'^(없음|\d+곳)$'));
+    await tester.tap(cells.at(3));
+    await tester.pumpAndSettle();
+    final icons = tester.widgetList<WeatherIcon>(find.descendant(of: find.byType(BottomSheet), matching: find.byType(WeatherIcon)));
+    expect(icons, isNotEmpty);
+    expect(icons.every((i) => i.night), isTrue);
   });
 }

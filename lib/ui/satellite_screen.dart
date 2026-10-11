@@ -143,7 +143,9 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: Text(l.satellite)),
-      body: Column(children: [
+      body: SafeArea(
+        top: false,
+        child: Column(children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
           child: Wrap(spacing: 6, runSpacing: 4, children: [
@@ -203,7 +205,8 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
         Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
             child: Text(credit, style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant))),
-      ]),
+        ]),
+      ),
     );
   }
 
@@ -248,7 +251,11 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
           // 모든 프레임의 지도 조각을 미리 받아 겹쳐 두고 지금 장면만 보이게
           for (var i = 0; i < frames.length; i++)
             Opacity(opacity: ts.isEmpty || i == _frame ? 1 : 0, child: _tiles(frames[i])),
-          TileLayer(urlTemplate: coastlinesUrl, maxNativeZoom: 9, userAgentPackageName: 'com.peep.weather'),
+          // 회색 위성 사진 위에서도 보이게 해안선을 노랗게
+          ColorFiltered(
+            colorFilter: const ColorFilter.mode(Color(0xFFFFE066), BlendMode.srcIn),
+            child: TileLayer(urlTemplate: coastlinesUrl, maxNativeZoom: 9, userAgentPackageName: 'com.peep.weather'),
+          ),
           MarkerLayer(markers: [
             Marker(
                 point: LatLng(widget.place.lat, widget.place.lon),
