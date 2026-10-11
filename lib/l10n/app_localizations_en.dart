@@ -255,4 +255,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get alertsChannel => 'Weather alerts';
+
+  @override
+  String get failNoStation => 'No station nearby';
 }

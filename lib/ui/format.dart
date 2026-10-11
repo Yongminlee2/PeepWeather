@@ -13,6 +13,7 @@ String failText(AppLocalizations l, Fail f) => switch (f) {
       Fail.quota => l.failQuota,
       Fail.network => l.failNetwork,
       Fail.parse => l.failParse,
+      Fail.noStation => l.failNoStation,
     };
 
 String sourceLabel(AppLocalizations l, String id) => switch (id) {

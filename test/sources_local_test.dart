@@ -108,16 +108,42 @@ void main() {
       expect(parseCommercialLicenses(fx('openaq_licenses.json')), {33, 40});
     });
     test('nearest commercial station with pm sensor', () {
-      final locs = parseLocations(fx('openaq_locations.json'), {33, 40});
+      final locs = parseLocations(fx('openaq_locations.json'), {33, 40}, now: DateTime.utc(2026, 10, 11, 10));
       expect(locs.map((l) => l.$1).toList(), [333, 222]);
       expect(locs.first.$3, {32: 'pm25'});
     });
     test('latest values', () {
-      final a = parseOpenAqLatest(fx('openaq_latest.json'), {32: 'pm25'}, 'Near Station');
+      final a = parseOpenAqLatest(fx('openaq_latest.json'), {32: 'pm25'}, 'Near Station', now: DateTime.utc(2026, 10, 11, 10));
       expect([a.pm10, a.pm25, a.station], [null, 18.5, 'Near Station']);
       expect(a.time, DateTime.utc(2026, 10, 11, 8));
     });
   });
 
   test('requireKey still guards keyed sources', () => expect(() => requireKey(''), failWith(Fail.noKey)));
+
+  group('OpenAQ real responses (2026-10-11)', () {
+    final now = DateTime.utc(2026, 10, 11, 10);
+    final allowed = parseCommercialLicenses(fx('openaq_licenses_real.json'));
+    test('licenses: ACT copyright is not commercial', () {
+      expect(allowed, containsAll([10, 33, 38, 39, 41]));
+      expect(allowed, isNot(contains(37)));
+    });
+    test('Seoul: only unlicensed or long-stopped stations, so none usable', () {
+      expect(parseLocations(fx('openaq_locations_real.json'), allowed, now: now), isEmpty);
+    });
+    test('Tokyo: nearest fresh licensed station with its pm sensor', () {
+      final locs = parseLocations(fx('openaq_locations_tokyo_real.json'), allowed, now: now);
+      expect(locs.first.$1, 1214509);
+      expect(locs.first.$3, {6520423: 'pm25'});
+    });
+    test('Tokyo latest values', () {
+      final a = parseOpenAqLatest(fx('openaq_latest_tokyo_real.json'), {6520423: 'pm25'}, 'Setagaya', now: now);
+      expect([a.pm10, a.pm25], [null, 9.0]);
+      expect(a.time, DateTime.utc(2026, 10, 11, 8));
+    });
+    test('stale latest values are ignored', () {
+      expect(() => parseOpenAqLatest(fx('openaq_latest_tokyo_real.json'), {6520423: 'pm25'}, 'x', now: DateTime.utc(2026, 10, 13)),
+          failWith(Fail.noStation));
+    });
+  });
 }

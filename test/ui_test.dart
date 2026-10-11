@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:weather_compare/main.dart';
 import 'package:weather_compare/models.dart';
 import 'package:weather_compare/repository.dart';
+import 'package:weather_compare/ui/format.dart';
 import 'package:weather_compare/ui/report_view.dart';
+import 'package:weather_compare/l10n/app_localizations.dart';
 
 final now = DateTime.utc(2026, 10, 11, 1, 20); // 서울 10:20
 const seoul = Place('서울', 'KR', 37.57, 126.98);
@@ -82,5 +84,9 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.scrollUntilVisible(find.textContaining('Hagupit'), 300, scrollable: find.byType(Scrollable).first);
     expect(tester.takeException(), isNull);
+  });
+
+  test('no-station failure has its own words', () {
+    expect(failText(lookupAppLocalizations(const Locale('ko')), Fail.noStation), '근처 측정소 없음');
   });
 }

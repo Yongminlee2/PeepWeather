@@ -56,7 +56,7 @@ class Cyclone {
   const Cyclone(this.name, this.lat, this.lon, this.time, {this.windKt});
 }
 
-enum Fail { noKey, badKey, quota, network, parse }
+enum Fail { noKey, badKey, quota, network, parse, noStation }
 
 /// 출처 하나의 결과: 성공이면 data, 실패면 fail. asOf 는 자료를 받은 시각.
 class Result<T> {

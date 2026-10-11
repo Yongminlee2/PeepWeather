@@ -75,5 +75,6 @@
  "moreEmpty": "Nothing here yet",
  "moreNow": "This app",
  "moreGet": "Get",
- "alertsChannel": "Weather alerts"
+ "alertsChannel": "Weather alerts",
+ "failNoStation": "No station nearby"
 }

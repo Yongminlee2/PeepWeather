@@ -553,6 +553,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Weather alerts'**
   String get alertsChannel;
+
+  /// No description provided for @failNoStation.
+  ///
+  /// In en, this message translates to:
+  /// **'No station nearby'**
+  String get failNoStation;
 }
 
 class _AppLocalizationsDelegate

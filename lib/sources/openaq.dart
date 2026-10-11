@@ -11,11 +11,21 @@ List<Map<String, dynamic>> _results(String body) =>
 Set<int> parseCommercialLicenses(String body) =>
     {for (final r in _results(body)) if (r['commercialUseAllowed'] == true) r['id'] as int};
 
-/// 상업 이용이 허용된 라이선스의 측정소 중 PM 센서가 있는 곳, 가까운 순.
+const _fresh = Duration(days: 1);
+
+bool _recent(Object? utc, DateTime now) {
+  final t = utc is String ? DateTime.tryParse(utc) : null;
+  return t != null && now.difference(t) < _fresh;
+}
+
+/// 상업 이용이 허용된 라이선스의 측정소 중 PM 센서가 있고 하루 안에 잰 곳, 가까운 순.
+/// 라이선스 정보가 없는 곳(한국 측정소 전부 — 원자료는 에어코리아)과 멈춘 측정소는 뺀다.
 /// (위치 id, 이름, 센서 id → 'pm10'|'pm25')
-List<(int, String, Map<int, String>)> parseLocations(String body, Set<int> allowed) {
+List<(int, String, Map<int, String>)> parseLocations(String body, Set<int> allowed, {DateTime? now}) {
+  final t = (now ?? DateTime.now()).toUtc();
   final locs = _results(body)
       .where((l) => ((l['licenses'] as List?) ?? const []).any((x) => allowed.contains(x['id'])))
+      .where((l) => _recent(l['datetimeLast']?['utc'], t))
       .toList()
     ..sort((a, b) => (toD(a['distance']) ?? 0).compareTo(toD(b['distance']) ?? 0));
   return [
@@ -29,17 +39,18 @@ List<(int, String, Map<int, String>)> parseLocations(String body, Set<int> allow
   ];
 }
 
-Air parseOpenAqLatest(String body, Map<int, String> sensors, String name) {
+Air parseOpenAqLatest(String body, Map<int, String> sensors, String name, {DateTime? now}) {
+  final n = (now ?? DateTime.now()).toUtc();
   double? pm10, pm25;
   DateTime? t;
   for (final r in _results(body)) {
     final p = sensors[r['sensorsId']];
-    if (p == null) continue;
+    if (p == null || !_recent(r['datetime']?['utc'], n)) continue; // 센서마다 멈췄을 수 있다
     if (p == 'pm10') pm10 = toD(r['value']);
     if (p == 'pm25') pm25 = toD(r['value']);
     t ??= DateTime.parse(r['datetime']['utc'] as String);
   }
-  if (t == null) throw const FormatException('no pm values');
+  if (t == null) throw const FetchError(Fail.noStation);
   return Air(pm10: pm10, pm25: pm25, station: name, time: t);
 }
 
@@ -53,7 +64,7 @@ Future<Stamped<Air>> openAq(Fetcher f, Place p) async {
         headers: h, maxAge: const Duration(days: 1)),
   ).wait;
   final found = parseLocations(locs.body, parseCommercialLicenses(lic.body));
-  if (found.isEmpty) throw const FormatException('no station nearby');
+  if (found.isEmpty) throw const FetchError(Fail.noStation);
   final (id, name, sensors) = found.first;
   final r = await f.get(u('locations/$id/latest'), headers: h);
   return (parseOpenAqLatest(r.body, sensors, name), r.at);

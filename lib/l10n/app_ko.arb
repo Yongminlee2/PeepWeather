@@ -75,5 +75,6 @@
  "moreEmpty": "아직 목록이 없어요",
  "moreNow": "지금 앱",
  "moreGet": "받기",
- "alertsChannel": "날씨 알림"
+ "alertsChannel": "날씨 알림",
+ "failNoStation": "근처 측정소 없음"
 }

@@ -255,4 +255,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get alertsChannel => '날씨 알림';
+
+  @override
+  String get failNoStation => '근처 측정소 없음';
 }
