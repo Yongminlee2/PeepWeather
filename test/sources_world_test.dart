@@ -135,4 +135,28 @@ void main() {
       expect(vcSky('wind'), Sky.cloudy);
     });
   });
+
+  group('OpenWeather real responses (2026-10-11, Seoul)', () {
+    test('forecast and current parse', () {
+      final f = parseOwmForecast(fx('owm_forecast_real.json'), fx('owm_weather_real.json'));
+      expect(f.hours.length, 40);
+      expect(f.utcOffset, const Duration(hours: 9));
+      expect(f.now!.tempC, inInclusiveRange(-40, 50));
+      expect(f.hours.every((h) => h.pop != null && h.pop! >= 0 && h.pop! <= 100), isTrue);
+    });
+    test('air parses', () {
+      final a = parseOwmAir(fx('owm_air_real.json'));
+      expect(a.pm10, isNotNull);
+      expect(a.pm25, isNotNull);
+    });
+    test('reverse geocoding gives Korean name and KR', () {
+      final p = parseOwmReverse(fx('owm_geo_real.json'), 37.57, 126.98, 'ko');
+      expect([p.name, p.country], ['서울', 'KR']);
+    });
+    test('city search finds Paris, France first', () {
+      final ps = parseOwmDirect(fx('owm_direct_real.json'), 'ko');
+      expect(ps.first.country, 'FR');
+      expect(ps.first.name, startsWith('파리'));
+    });
+  });
 }
