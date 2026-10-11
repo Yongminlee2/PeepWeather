@@ -10,4 +10,231 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appTitle => 'Weather Compare';
+
+  @override
+  String get currentLocation => 'Current location';
+
+  @override
+  String asOf(Object time) {
+    return 'as of $time';
+  }
+
+  @override
+  String get nowTitle => 'Now';
+
+  @override
+  String get hourlyTitle => 'Hourly comparison';
+
+  @override
+  String get dailyTitle => 'Daily comparison';
+
+  @override
+  String get diverge => 'Forecasts disagree';
+
+  @override
+  String get airTitle => 'Air quality comparison';
+
+  @override
+  String get pm10 => 'PM10';
+
+  @override
+  String get pm25 => 'PM2.5';
+
+  @override
+  String get gradeGood => 'Good';
+
+  @override
+  String get gradeNormal => 'Moderate';
+
+  @override
+  String get gradeBad => 'Bad';
+
+  @override
+  String get gradeVeryBad => 'Very bad';
+
+  @override
+  String get stormTitle => 'Tropical cyclones';
+
+  @override
+  String get noStorm => 'No cyclones within 1,000 km';
+
+  @override
+  String stormKm(Object km) {
+    return '$km km';
+  }
+
+  @override
+  String windKt(Object kt) {
+    return 'Max wind $kt kt';
+  }
+
+  @override
+  String get satellite => 'Satellite cloud map';
+
+  @override
+  String get attribution => 'Data sources';
+
+  @override
+  String get failNoKey => 'Not set up';
+
+  @override
+  String get failBadKey => 'Key error';
+
+  @override
+  String get failQuota => 'Daily limit reached';
+
+  @override
+  String get failNetwork => 'Check connection';
+
+  @override
+  String get failParse => 'Unavailable';
+
+  @override
+  String get search => 'Search city';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get locationNeeded => 'Location unavailable. Search and add a city.';
+
+  @override
+  String get openLocationSettings => 'Open location settings';
+
+  @override
+  String get searchHint => 'City name';
+
+  @override
+  String get noResults => 'No results';
+
+  @override
+  String added(Object name) {
+    return 'Added $name';
+  }
+
+  @override
+  String get fahrenheit => 'Show °F';
+
+  @override
+  String get alerts => 'Alerts';
+
+  @override
+  String get alertRain => 'Rain (60%+ within 12 h)';
+
+  @override
+  String get alertAir => 'Air quality bad or worse';
+
+  @override
+  String get alertStorm => 'Cyclone within 500 km';
+
+  @override
+  String get savedPlaces => 'Saved cities';
+
+  @override
+  String get privacy => 'Privacy policy';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get loading => 'Loading';
+
+  @override
+  String get srcMet => 'MET Norway';
+
+  @override
+  String get srcOwm => 'OpenWeather';
+
+  @override
+  String get srcWeatherapi => 'WeatherAPI';
+
+  @override
+  String get srcVc => 'Visual Crossing';
+
+  @override
+  String get srcNws => 'US NWS';
+
+  @override
+  String get srcKma => 'KMA (Korea)';
+
+  @override
+  String get srcAirkorea => 'AirKorea';
+
+  @override
+  String get srcOpenaq => 'OpenAQ';
+
+  @override
+  String get srcGdacs => 'GDACS (UN·EU)';
+
+  @override
+  String get srcNhc => 'US NHC';
+
+  @override
+  String get srcJtwc => 'US JTWC';
+
+  @override
+  String get srcKmaTyphoon => 'KMA Typhoon';
+
+  @override
+  String get satInfrared => 'Infrared';
+
+  @override
+  String get satVisible => 'Visible';
+
+  @override
+  String get satTrueColor => 'True color (daily)';
+
+  @override
+  String get satClouds => 'Clouds (model)';
+
+  @override
+  String get satPrecip => 'Precip (model)';
+
+  @override
+  String get satKma => 'GK-2A';
+
+  @override
+  String get satNight => 'It\'s night — try infrared';
+
+  @override
+  String get play => 'Play';
+
+  @override
+  String get pause => 'Pause';
+
+  @override
+  String rainSoon(Object place) {
+    return 'Rain coming to $place';
+  }
+
+  @override
+  String rainSoonBody(Object pop, Object source, Object time) {
+    return '$source: $pop% at $time';
+  }
+
+  @override
+  String airBad(Object grade, Object place) {
+    return '$place air quality $grade';
+  }
+
+  @override
+  String airBadBody(Object source) {
+    return 'per $source';
+  }
+
+  @override
+  String stormNear(Object name) {
+    return 'Cyclone $name approaching';
+  }
+
+  @override
+  String stormNearBody(Object km, Object place) {
+    return '$km km from $place';
+  }
+
+  @override
+  String get moreGames => 'More games by the developer';
 }

@@ -28,6 +28,10 @@ class Fetcher {
   final DateTime Function() _now;
   final _inFlight = <String, Future<Fetched>>{};
 
+  /// 당겨서 새로고침할 때: 30분 이하로 저장하는 자료는 이 시간보다 오래됐으면 다시 받는다.
+  /// (측정소 목록처럼 오래 두는 자료는 그대로)
+  Duration? freshCap;
+
   /// 같은 주소를 동시에 부르면 요청 하나를 같이 기다린다.
   Future<Fetched> get(Uri url, {Duration maxAge = const Duration(minutes: 30), Map<String, String>? headers}) {
     final key = url.toString();
@@ -40,7 +44,9 @@ class Fetcher {
   Future<Fetched> _get(Uri url, Duration maxAge, Map<String, String>? headers) async {
     final file = File('${dir.path}/${_hash(url.toString())}.txt');
     final cached = await _read(file);
-    if (cached != null && _now().difference(cached.at) < maxAge) return cached;
+    final cap = freshCap;
+    final age = cap != null && maxAge <= const Duration(minutes: 30) && cap < maxAge ? cap : maxAge;
+    if (cached != null && _now().difference(cached.at) < age) return cached;
 
     final http.Response res;
     try {

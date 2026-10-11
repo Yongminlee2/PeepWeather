@@ -6,8 +6,9 @@ import 'l10n/app_localizations.dart';
 void main() => runApp(const WeatherApp());
 
 class WeatherApp extends StatelessWidget {
-  const WeatherApp({super.key, this.home});
+  const WeatherApp({super.key, this.home, this.locale});
   final Widget? home;
+  final Locale? locale;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -19,6 +20,7 @@ class WeatherApp extends StatelessWidget {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: locale,
         theme: ThemeData(colorSchemeSeed: Colors.indigo, useMaterial3: true),
         darkTheme: ThemeData(
             colorSchemeSeed: Colors.indigo,

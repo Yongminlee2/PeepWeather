@@ -93,4 +93,16 @@ void main() {
     expect(rs.map((r) => r.body), ['one', 'one']);
     expect(calls, 1);
   });
+
+  test('freshCap forces refetch of short-lived entries only', () async {
+    var calls = 0;
+    final f = Fetcher(MockClient((_) async => http.Response('b${++calls}', 200)), dir, now: () => now);
+    final long = Uri.parse('https://example.com/stations');
+    await f.get(url);
+    await f.get(long, maxAge: const Duration(days: 30));
+    now = now.add(const Duration(minutes: 6));
+    f.freshCap = const Duration(minutes: 5);
+    expect((await f.get(url)).body, 'b3');
+    expect((await f.get(long, maxAge: const Duration(days: 30))).body, 'b2');
+  });
 }
