@@ -263,7 +263,7 @@ abstract class AppLocalizations {
   /// No description provided for @locationNeeded.
   ///
   /// In en, this message translates to:
-  /// **'Location unavailable. Search and add a city.'**
+  /// **'Your location isn\'t available. Pick a city below or search.'**
   String get locationNeeded;
 
   /// No description provided for @openLocationSettings.
@@ -847,6 +847,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'None yet. Add a city with the search button on the main screen, then swipe between them.'**
   String get noPlaces;
+
+  /// No description provided for @quickCities.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular cities'**
+  String get quickCities;
+
+  /// No description provided for @whereWeather.
+  ///
+  /// In en, this message translates to:
+  /// **'Where shall we look?'**
+  String get whereWeather;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
 }
 
 class _AppLocalizationsDelegate

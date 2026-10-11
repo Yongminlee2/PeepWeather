@@ -27,7 +27,7 @@
  "failParse": "Unavailable",
  "search": "Search city",
  "settings": "Settings",
- "locationNeeded": "Location unavailable. Search and add a city.",
+ "locationNeeded": "Your location isn't available. Pick a city below or search.",
  "openLocationSettings": "Open location settings",
  "searchHint": "City name",
  "noResults": "No results",
@@ -124,5 +124,8 @@
  "infoAir": "µg/m³ is the weight of particles (millionths of a gram) in one cubic metre of air.\n\nPM10 are particles up to 10 µm, PM2.5 up to 2.5 µm.\n\nGrades (Korean standard)\nPM10: good 0–30, moderate 31–80, bad 81–150, very bad 151+\nPM2.5: good 0–15, moderate 16–35, bad 36–75, very bad 76+\n\nFilled dots are station measurements, hollow dots are model estimates. Measurements are more accurate; models cover places without stations but can be far off.",
  "close": "Close",
  "searchIntro": "Type a city name and press search on the keyboard.\nFor example: Busan, Tokyo, Paris",
- "noPlaces": "None yet. Add a city with the search button on the main screen, then swipe between them."
+ "noPlaces": "None yet. Add a city with the search button on the main screen, then swipe between them.",
+ "quickCities": "Popular cities",
+ "whereWeather": "Where shall we look?",
+ "about": "About"
 }

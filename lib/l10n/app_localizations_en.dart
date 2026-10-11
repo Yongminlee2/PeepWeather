@@ -96,7 +96,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
-  String get locationNeeded => 'Location unavailable. Search and add a city.';
+  String get locationNeeded =>
+      'Your location isn\'t available. Pick a city below or search.';
 
   @override
   String get openLocationSettings => 'Open location settings';
@@ -421,4 +422,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noPlaces =>
       'None yet. Add a city with the search button on the main screen, then swipe between them.';
+
+  @override
+  String get quickCities => 'Popular cities';
+
+  @override
+  String get whereWeather => 'Where shall we look?';
+
+  @override
+  String get about => 'About';
 }

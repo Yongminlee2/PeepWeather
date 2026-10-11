@@ -96,7 +96,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings => '설정';
 
   @override
-  String get locationNeeded => '위치를 알 수 없어요. 도시를 검색해서 추가하세요.';
+  String get locationNeeded => '지금 위치를 알 수 없어요. 아래에서 도시를 고르거나 검색해 주세요.';
 
   @override
   String get openLocationSettings => '위치 권한 설정 열기';
@@ -419,4 +419,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get noPlaces => '아직 없어요. 첫 화면 오른쪽 위 돋보기로 도시를 추가하면 옆으로 넘겨 볼 수 있어요.';
+
+  @override
+  String get quickCities => '자주 찾는 도시';
+
+  @override
+  String get whereWeather => '어디 날씨를 볼까요?';
+
+  @override
+  String get about => '정보';
 }

@@ -36,7 +36,7 @@ void main() {
     await pump(tester, HomeScreen(state: st));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200)));
     await tester.pump();
-    expect(find.text('위치를 알 수 없어요. 도시를 검색해서 추가하세요.'), findsOneWidget);
+    expect(find.text('지금 위치를 알 수 없어요. 아래에서 도시를 고르거나 검색해 주세요.'), findsOneWidget);
     expect(find.text('도시 검색'), findsWidgets);
     expect(find.text('위치 권한 설정 열기'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -88,5 +88,32 @@ void main() {
     await pump(tester, SettingsScreen(settings: s));
     await tester.pumpAndSettle();
     expect(find.textContaining('돋보기'), findsOneWidget);
+  });
+
+  testWidgets('quick city chips add a city without searching', (tester) async {
+    late AppState st;
+    await tester.runAsync(() async {
+      st = AppState(await Settings.load(), Fetcher(fakeNet(), dir), locator: () async => null);
+    });
+    await pump(tester, SearchScreen(state: st));
+    await tester.runAsync(() async {
+      await tester.tap(find.text('부산'));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    });
+    await tester.pump();
+    expect(st.settings.places.map((p) => p.name), contains('부산'));
+    expect(st.settings.places.firstWhere((p) => p.name == '부산').country, 'KR');
+  });
+
+  testWidgets('no-location screen offers quick cities too', (tester) async {
+    late AppState st;
+    await tester.runAsync(() async {
+      st = AppState(await Settings.load(), Fetcher(fakeNet(), dir), locator: () async => null);
+    });
+    await pump(tester, HomeScreen(state: st));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200)));
+    await tester.pump();
+    expect(find.text('제주'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

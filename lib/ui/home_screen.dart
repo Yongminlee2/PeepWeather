@@ -5,7 +5,9 @@ import '../app_state.dart';
 import '../l10n/app_localizations.dart';
 import '../models.dart';
 import 'report_view.dart';
+import 'quick_cities.dart';
 import 'search_screen.dart';
+import 'theme.dart';
 import 'settings_screen.dart';
 
 /// 현재 위치 + 저장 도시를 옆으로 넘겨 본다.
@@ -64,6 +66,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _load(i);
   }
 
+  Future<void> _pick(Place p) async {
+    await addPlace(st, p);
+    if (!mounted) return;
+    final i = st.places.indexWhere((x) => placeKey(x) == placeKey(p));
+    if (i >= 0 && _pages.hasClients) _pages.jumpToPage(i);
+    _load(i);
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -92,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ],
           ),
           body: ps.isEmpty
-              ? (st.locating || !_started ? const Center(child: CircularProgressIndicator()) : _NoLocation(onSearch: _search))
+              ? (st.locating || !_started ? const Center(child: CircularProgressIndicator()) : _NoLocation(onSearch: _search, onPick: _pick))
               : Column(children: [
                   Expanded(
                     child: PageView.builder(
@@ -154,23 +164,45 @@ class _PlacePage extends StatelessWidget {
 }
 
 class _NoLocation extends StatelessWidget {
-  const _NoLocation({required this.onSearch});
+  const _NoLocation({required this.onSearch, required this.onPick});
   final VoidCallback onSearch;
+  final void Function(Place p) onPick;
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Icon(Icons.location_off, size: 48),
-          const SizedBox(height: 12),
-          Text(l.locationNeeded, textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          FilledButton.icon(onPressed: onSearch, icon: const Icon(Icons.search), label: Text(l.search)),
-          TextButton(onPressed: Geolocator.openAppSettings, child: Text(l.openLocationSettings)),
+    return ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 32), children: [
+      // 첫 화면과 같은 하늘 카드 — 위치가 없어도 바로 도시를 고를 수 있게
+      Container(
+        padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: LinearGradient(
+              begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: const [Color(0xFF24508A), Color(0xFF4A80B4)]),
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Icon(Icons.location_off_outlined, color: Colors.white, size: 32),
+          const SizedBox(height: 10),
+          Text(l.whereWeather, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: Colors.white)),
+          const SizedBox(height: 6),
+          Text(l.locationNeeded, style: TextStyle(fontSize: 15, height: 1.5, color: Colors.white.withValues(alpha: 0.85))),
+          const SizedBox(height: 18),
+          QuickCityChips(onPick: onPick, onDark: true),
+          const SizedBox(height: 18),
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            FilledButton.icon(
+              onPressed: onSearch,
+              icon: const Icon(Icons.search),
+              label: Text(l.search),
+              style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: wx(context).ink),
+            ),
+            TextButton(
+              onPressed: Geolocator.openAppSettings,
+              style: TextButton.styleFrom(foregroundColor: Colors.white),
+              child: Text(l.openLocationSettings),
+            ),
+          ]),
         ]),
       ),
-    );
+    ]);
   }
 }

@@ -6,8 +6,10 @@ import '../l10n/app_localizations.dart';
 import '../models.dart';
 import '../sources/openweather.dart';
 import 'format.dart';
+import 'quick_cities.dart';
+import 'theme.dart';
 
-/// 도시 검색 → 고르면 저장 도시에 추가하고 그 장소를 돌려준다.
+/// 도시 검색 → 고르면 저장 도시에 추가하고 그 장소를 돌려준다. 검색 전엔 자주 찾는 도시를 바로 넣을 수 있다.
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key, required this.state});
   final AppState state;
@@ -41,43 +43,66 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> _add(Place p) async {
-    final s = widget.state.settings;
-    if (!s.places.any((x) => placeKey(x) == placeKey(p))) {
-      await s.update((s) => s.places = [...s.places, p]);
-    }
-    if (mounted) Navigator.of(context).pop(p);
+    await addPlace(widget.state, p);
+    if (mounted) Navigator.of(context).maybePop(p);
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final w = wx(context);
     return Scaffold(
       appBar: AppBar(
-        title: TextField(
-          autofocus: true,
-          textInputAction: TextInputAction.search,
-          decoration: InputDecoration(hintText: l.searchHint, border: InputBorder.none),
-          onSubmitted: _search,
+        titleSpacing: 0,
+        title: Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: TextField(
+            autofocus: true,
+            textInputAction: TextInputAction.search,
+            style: TextStyle(color: w.ink),
+            decoration: InputDecoration(
+              hintText: l.searchHint,
+              prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: w.surface,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(28), borderSide: BorderSide(color: w.line)),
+              enabledBorder:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(28), borderSide: BorderSide(color: w.line)),
+            ),
+            onSubmitted: _search,
+          ),
         ),
       ),
-      body: _busy
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Text(_error!))
-              : _results == null
-                  ? Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Text(l.searchIntro, style: const TextStyle(fontSize: 15, height: 1.6)),
-                    )
-                  : ListView(children: [
-                  for (final p in _results ?? const <Place>[])
+      body: SafeArea(
+        top: false,
+        child: _busy
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 24), children: [
+                if (_error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Text(_error!, style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.error)),
+                  ),
+                if (_results case final rs? when rs.isNotEmpty)
+                  for (final p in rs)
                     ListTile(
-                      leading: const Icon(Icons.location_city),
-                      title: Text(p.name),
-                      subtitle: Text('${p.country} · ${p.lat.toStringAsFixed(2)}, ${p.lon.toStringAsFixed(2)}'),
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(Icons.place_outlined, color: w.rain),
+                      title: Text(p.name, style: TextStyle(color: w.ink)),
+                      subtitle: Text(p.country, style: TextStyle(color: w.muted)),
                       onTap: () => _add(p),
-                    ),
-                ]),
+                    )
+                else ...[
+                  Text(l.searchIntro, style: TextStyle(fontSize: 15, height: 1.6, color: w.muted)),
+                  const SizedBox(height: 24),
+                  Text(l.quickCities, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: w.ink)),
+                  const SizedBox(height: 10),
+                  QuickCityChips(onPick: _add),
+                ],
+              ]),
+      ),
     );
   }
 }
