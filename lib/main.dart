@@ -10,6 +10,7 @@ import 'fetcher.dart';
 import 'l10n/app_localizations.dart';
 import 'settings.dart';
 import 'ui/home_screen.dart';
+import 'ui/satellite_screen.dart';
 
 Future<Fetcher> makeFetcher() async =>
     Fetcher(http.Client(), Directory('${(await getApplicationSupportDirectory()).path}/responses'));
@@ -17,7 +18,11 @@ Future<Fetcher> makeFetcher() async =>
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final state = AppState(await Settings.load(), await makeFetcher());
-  runApp(WeatherApp(home: HomeScreen(state: state)));
+  runApp(WeatherApp(
+      home: HomeScreen(
+          state: state,
+          onSatellite: (context, p) => Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => SatelliteScreen(place: p, fetcher: state.fetcher))))));
 }
 
 class WeatherApp extends StatelessWidget {
