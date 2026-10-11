@@ -13,8 +13,9 @@ import 'format.dart';
 
 /// 위성 구름 지도: 위쪽 칩으로 출처를 바꾸고, 정지위성은 최근 2시간을 재생한다.
 class SatelliteScreen extends StatefulWidget {
-  const SatelliteScreen({super.key, required this.place, required this.fetcher, this.now});
+  const SatelliteScreen({super.key, required this.place, required this.fetcher, this.offset, this.now});
   final Place place;
+  final Duration? offset; // 장소 시간대(없으면 폰 시간대)
   final Fetcher fetcher;
   final DateTime? now;
 
@@ -101,7 +102,7 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
             Expanded(
               child: Text(_frame == null
                   ? ''
-                  : localTime(_frames[_frame!], DateTime.now().timeZoneOffset, Localizations.localeOf(context).toString(),
+                  : localTime(_frames[_frame!], widget.offset ?? DateTime.now().timeZoneOffset, Localizations.localeOf(context).toString(),
                       'M/d HH:mm')),
             ),
           ]),

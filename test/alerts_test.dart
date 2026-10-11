@@ -34,6 +34,7 @@ void main() {
   List<Alert> decide(Report r, Map<String, String> sent) => decideAlerts(r, s, sent, now, l);
   Map<String, String> record(List<Alert> as, [Map<String, String>? sent]) => {...?sent, for (final a in as) a.key: a.value};
 
+
   test('rain 60% within 12h alerts once per day', () {
     final a = decide(report(pop: 60), {});
     expect(a.single.key, 'rain:2026-10-11');
@@ -76,5 +77,17 @@ void main() {
       s.alertStorm = false;
     });
     expect(decide(report(pop: 90, pm10: 200, stormLat: 36), {}), isEmpty);
+  });
+
+  test('sent records carry their date and old ones are pruned', () {
+    final a = decide(report(stormLat: 37.57 - 4.0), {});
+    expect(a.single.value, endsWith('@2026-10-11'));
+    final sent = {
+      'storm:TEN': '300@2026-09-01',
+      'rain:2026-10-10': '2026-10-10@2026-10-10',
+      'storm:HAGUPIT': '445@2026-10-11',
+      'legacy': '123',
+    };
+    expect(pruneSent(sent, now).keys, ['rain:2026-10-10', 'storm:HAGUPIT']);
   });
 }

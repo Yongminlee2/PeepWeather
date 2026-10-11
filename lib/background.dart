@@ -24,7 +24,7 @@ final notifications = FlutterLocalNotificationsPlugin();
 
 Future<void> initNotifications() => notifications.initialize(
     settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'), iOS: DarwinInitializationSettings()));
+        android: AndroidInitializationSettings('ic_stat_weather'), iOS: DarwinInitializationSettings()));
 
 /// 앱 시작 때: 2시간마다 확인 등록.
 Future<void> scheduleChecks() async {
@@ -53,7 +53,7 @@ Future<bool> runCheck() async {
   if (place == null) return true;
   final report = await loadReport(await makeFetcher(), place, background: true);
   final prefs = await SharedPreferences.getInstance();
-  final sent = (jsonDecode(prefs.getString('alertsSent') ?? '{}') as Map).cast<String, String>();
+  final sent = pruneSent((jsonDecode(prefs.getString('alertsSent') ?? '{}') as Map).cast<String, String>(), DateTime.now().toUtc());
   final l = deviceL10n();
   await syncWidget(report, s.fahrenheit, l);
   final alerts = decideAlerts(report, s, sent, DateTime.now().toUtc(), l);
@@ -64,13 +64,13 @@ Future<bool> runCheck() async {
           id: a.key.hashCode & 0x7fffffff,
           title: a.title,
           body: a.body,
-          notificationDetails: const NotificationDetails(
-              android: AndroidNotificationDetails('alerts', 'Weather alerts', importance: Importance.defaultImportance),
-              iOS: DarwinNotificationDetails()));
+          notificationDetails: NotificationDetails(
+              android: AndroidNotificationDetails('alerts', l.alertsChannel, importance: Importance.defaultImportance),
+              iOS: const DarwinNotificationDetails()));
       sent[a.key] = a.value;
     }
-    await prefs.setString('alertsSent', jsonEncode(sent));
   }
+  await prefs.setString('alertsSent', jsonEncode(sent));
   return true;
 }
 

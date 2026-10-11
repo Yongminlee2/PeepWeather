@@ -547,6 +547,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get'**
   String get moreGet;
+
+  /// No description provided for @alertsChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather alerts'**
+  String get alertsChannel;
 }
 
 class _AppLocalizationsDelegate

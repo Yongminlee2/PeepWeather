@@ -7,7 +7,7 @@ import 'ui/format.dart';
 
 class Alert {
   final String key; // 중복 방지 기록 키
-  final String value; // 기록값(날짜 또는 알린 거리 km)
+  final String value; // 기록값 "<값>@<보낸 날짜>" (태풍은 값 = 처음 알린 거리 km)
   final String title, body;
   const Alert(this.key, this.value, this.title, this.body);
 }
@@ -29,7 +29,7 @@ List<Alert> decideAlerts(Report r, Settings s, Map<String, String> sent, DateTim
     if (hits.isNotEmpty) {
       final (src, h) = hits.first;
       final t = h.time.add(r.offset); // 백그라운드에선 intl 날짜 자료가 없어서 DateFormat 대신 직접
-      out.add(Alert('rain:$today', today, l.rainSoon(place),
+      out.add(Alert('rain:$today', '$today@$today', l.rainSoon(place),
           l.rainSoonBody('${h.pop}', sourceLabel(l, src), '${two(t.hour)}:${two(t.minute)}')));
     }
   }
@@ -40,7 +40,7 @@ List<Alert> decideAlerts(Report r, Settings s, Map<String, String> sent, DateTim
         if (a.data == null ? null : worstGrade(a.data!) case final g?) (a.source, g)
     ]..sort((a, b) => b.$2.index.compareTo(a.$2.index));
     if (worst.isNotEmpty && worst.first.$2.index >= Grade.bad.index) {
-      out.add(Alert('air:$today', today, l.airBad(gradeText(l, worst.first.$2), place),
+      out.add(Alert('air:$today', '$today@$today', l.airBad(gradeText(l, worst.first.$2), place),
           l.airBadBody(sourceLabel(l, worst.first.$1))));
     }
   }
@@ -51,16 +51,24 @@ List<Alert> decideAlerts(Report r, Settings s, Map<String, String> sent, DateTim
       if (km > 500) continue;
       final name = g.map((m) => normName(m.$2.name)).firstWhere((n) => n.isNotEmpty, orElse: () => g.first.$2.name);
       final key = 'storm:$name';
-      final first = double.tryParse(sent[key] ?? '');
+      final first = double.tryParse((sent[key] ?? '').split('@').first);
       final title = l.stormNear(name), body = l.stormNearBody(km.round().toString(), place);
       if (first == null) {
-        out.add(Alert(key, km.round().toString(), title, body));
+        out.add(Alert(key, '${km.round()}@$today', title, body));
       } else if (km <= first / 2 && !sent.containsKey('$key:half')) {
-        out.add(Alert('$key:half', km.round().toString(), title, body));
+        out.add(Alert('$key:half', '${km.round()}@$today', title, body));
       }
     }
   }
   return out;
 }
+
+/// 30일 넘은 기록은 지운다 — 번호 이름 태풍(TEN 등)은 해마다 다시 오고, 기록이 끝없이 쌓이지 않게.
+Map<String, String> pruneSent(Map<String, String> sent, DateTime nowUtc) => {
+      for (final e in sent.entries)
+        if (DateTime.tryParse(e.value.split('@').last) case final d?
+            when nowUtc.difference(d) < const Duration(days: 30))
+          e.key: e.value
+    };
 
 String two(int v) => v.toString().padLeft(2, '0');

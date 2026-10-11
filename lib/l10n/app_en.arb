@@ -74,5 +74,6 @@
  "moreOffline": "Connect to the internet to see the list",
  "moreEmpty": "Nothing here yet",
  "moreNow": "This app",
- "moreGet": "Get"
+ "moreGet": "Get",
+ "alertsChannel": "Weather alerts"
 }

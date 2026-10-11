@@ -28,7 +28,13 @@ Future<(double, double)?> deviceLocation() async {
 }
 
 class AppState extends ChangeNotifier {
-  AppState(this.settings, this.fetcher, {Locator? locator, this.onReport}) : _locator = locator ?? deviceLocation;
+  AppState(this.settings, this.fetcher, {Locator? locator, this.onReport}) : _locator = locator ?? deviceLocation {
+    // 섭씨/화씨를 바꾸면 위젯도 바로 다시 그리게
+    settings.addListener(() {
+      final r = places.isEmpty ? null : reportFor(places.first);
+      if (r != null) onReport?.call(r);
+    });
+  }
   final void Function(Report r)? onReport; // 첫 장(현재 위치)을 새로 받았을 때 — 홈 화면 위젯 갱신
   final Settings settings;
   final Fetcher fetcher;
@@ -66,7 +72,8 @@ class AppState extends ChangeNotifier {
       } catch (_) {
         // 지명을 못 얻어도 한국 안이면 한국 출처는 붙인다.
         final inKorea = lat >= 33 && lat <= 39 && lon >= 124 && lon <= 132;
-        current = Place(fallbackName, inKorea ? 'KR' : '', lat, lon);
+        final inUs = lat >= 24.5 && lat <= 49.5 && lon >= -125 && lon <= -66.9; // 미국 본토(키 없어도 NWS 는 쓸 수 있다)
+        current = Place(fallbackName, inKorea ? 'KR' : inUs ? 'US' : '', lat, lon);
       }
       await settings.update((s) => s.lastPos = current);
     }
@@ -79,12 +86,10 @@ class AppState extends ChangeNotifier {
     if (_loading.contains(k)) return;
     _loading.add(k);
     notifyListeners();
-    fetcher.freshCap = force ? const Duration(minutes: 5) : null;
     try {
-      final r = _reports[k] = await loadReport(fetcher, p);
+      final r = _reports[k] = await loadReport(force ? fetcher.forced(const Duration(minutes: 5)) : fetcher, p);
       if (places.isNotEmpty && placeKey(places.first) == k) onReport?.call(r);
     } finally {
-      fetcher.freshCap = null;
       _loading.remove(k);
       notifyListeners();
     }

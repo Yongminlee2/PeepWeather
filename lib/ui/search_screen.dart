@@ -26,14 +26,15 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() => _busy = true);
     try {
       final rs = await owmSearch(widget.state.fetcher, q.trim(), Localizations.localeOf(context).languageCode);
+      if (!mounted) return; // 검색 중에 화면을 닫았으면
       setState(() {
         _results = rs;
         _error = rs.isEmpty ? l.noResults : null;
       });
     } on FetchError catch (e) {
-      setState(() => _error = failText(l, e.fail));
+      if (mounted) setState(() => _error = failText(l, e.fail));
     } catch (_) {
-      setState(() => _error = l.failParse);
+      if (mounted) setState(() => _error = l.failParse);
     } finally {
       if (mounted) setState(() => _busy = false);
     }

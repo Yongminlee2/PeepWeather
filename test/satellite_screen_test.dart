@@ -49,4 +49,23 @@ void main() {
     await tester.pump();
     expect(find.text('설정 필요'), findsOneWidget);
   });
+
+  testWidgets('frame time is shown in the place time zone', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(WeatherApp(
+        locale: const Locale('ko'),
+        home: SatelliteScreen(
+            place: const Place('서울', 'KR', 37.57, 126.98),
+            fetcher: Fetcher(fakeNet(), dir),
+            offset: const Duration(hours: 9),
+            now: DateTime.utc(2026, 10, 11, 3))));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.play_arrow));
+    await tester.pump();
+    expect(find.text('10/11 08:50'), findsOneWidget); // 첫 프레임 23:50Z(=03:00−80분−110분) → 서울 08:50
+    await tester.tap(find.byIcon(Icons.pause));
+    await tester.pump();
+  });
 }

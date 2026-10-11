@@ -20,7 +20,7 @@ Future<void> main() async {
           state: state,
           afterLocate: () => askNotificationPermission().ignore(),
           onSatellite: (context, p) => Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => SatelliteScreen(place: p, fetcher: state.fetcher))))));
+              .push(MaterialPageRoute(builder: (_) => SatelliteScreen(place: p, fetcher: state.fetcher, offset: state.reportFor(p)?.offset))))));
 }
 
 class WeatherApp extends StatelessWidget {

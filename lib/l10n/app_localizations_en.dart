@@ -252,4 +252,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moreGet => 'Get';
+
+  @override
+  String get alertsChannel => 'Weather alerts';
 }

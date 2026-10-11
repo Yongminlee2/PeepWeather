@@ -22,21 +22,33 @@ class Fetched {
 
 /// HTTP GET + 요청 주소별 파일 캐시. 캐시 파일 첫 줄은 저장 시각, 나머지는 응답 원문.
 class Fetcher {
-  Fetcher(this.client, this.dir, {DateTime Function()? now}) : _now = now ?? DateTime.now;
+  Fetcher(this.client, this.dir, {DateTime Function()? now})
+      : _now = now ?? DateTime.now,
+        freshCap = null,
+        _inFlight = {};
+  Fetcher._forced(Fetcher base, Duration this.freshCap)
+      : client = base.client,
+        dir = base.dir,
+        _now = base._now,
+        _inFlight = base._inFlight;
+
   final http.Client client;
   final Directory dir;
   final DateTime Function() _now;
-  final _inFlight = <String, Future<Fetched>>{};
+  final Map<String, Future<Fetched>> _inFlight;
 
   /// 당겨서 새로고침할 때: 30분 이하로 저장하는 자료는 이 시간보다 오래됐으면 다시 받는다.
   /// (측정소 목록처럼 오래 두는 자료는 그대로)
-  Duration? freshCap;
+  final Duration? freshCap;
+
+  /// 같은 저장소를 쓰되 [cap] 보다 오래된 자료는 다시 받는 요청기(그 새로고침에만 쓴다).
+  Fetcher forced(Duration cap) => Fetcher._forced(this, cap);
 
   /// 같은 주소를 동시에 부르면 요청 하나를 같이 기다린다.
   /// check: 응답 본문 검사(공공데이터포털은 키 오류도 200 으로 준다). 던지면 저장하지 않는다.
   Future<Fetched> get(Uri url,
       {Duration maxAge = const Duration(minutes: 30), Map<String, String>? headers, void Function(String body)? check}) {
-    final key = url.toString();
+    final key = '${freshCap?.inSeconds ?? ''}|$url'; // 강제 새로고침은 보통 요청과 섞이지 않게
     // whenComplete 콜백이 Future 를 돌려주면 그걸 기다리므로, 지운 값(자기 자신)을 돌려주지 않게 블록으로.
     return _inFlight.putIfAbsent(key, () => _get(url, maxAge, headers, check).whenComplete(() {
           _inFlight.remove(key);

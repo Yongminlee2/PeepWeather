@@ -55,4 +55,21 @@ void main() {
     expect(st.isStale(p, now: t.add(const Duration(minutes: 10))), isFalse);
     expect(st.isStale(p, now: t.add(const Duration(minutes: 31))), isTrue);
   });
+
+  test('locate without key detects the US by bounding box', () async {
+    final st = AppState(await Settings.load(), Fetcher(fakeNet(), dir), locator: () async => (40.71, -74.01));
+    await st.locate('en', 'Current location');
+    expect(st.current!.country, 'US');
+  });
+
+  test('changing settings re-sends the first report (home widget units)', () async {
+    final s = await Settings.load();
+    var sent = 0;
+    final st = AppState(s, Fetcher(fakeNet(), dir), locator: () async => (37.57, 126.98), onReport: (_) => sent++);
+    await st.locate('ko', '현재 위치');
+    await st.refresh(st.current!);
+    expect(sent, 1);
+    await s.update((s) => s.fahrenheit = true);
+    expect(sent, 2);
+  });
 }

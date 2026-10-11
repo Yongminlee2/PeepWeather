@@ -252,4 +252,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get moreGet => '받기';
+
+  @override
+  String get alertsChannel => '날씨 알림';
 }

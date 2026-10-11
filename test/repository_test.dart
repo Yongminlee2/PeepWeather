@@ -82,9 +82,14 @@ void main() {
     expect(met.days.first.date, DateTime.utc(first.year, first.month, first.day));
   });
 
-  test('device offset is the fallback', () async {
-    final r = await loadReport(Fetcher(fakeNet(), dir), paris, deviceOffset: const Duration(hours: 2));
-    expect(r.offset, const Duration(hours: 2));
+  test('device offset is the fallback near the phone', () async {
+    final r = await loadReport(Fetcher(fakeNet(), dir), paris, deviceOffset: const Duration(hours: 1));
+    expect(r.offset, const Duration(hours: 1));
+  });
+
+  test('far-away city without a time zone source uses a longitude estimate, not the phone', () async {
+    final r = await loadReport(Fetcher(fakeNet(), dir), paris, deviceOffset: const Duration(hours: 9));
+    expect(r.offset, Duration.zero);
   });
 
   test('settings round trip', () async {

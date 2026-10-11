@@ -75,6 +75,13 @@ List<Source<List<Cyclone>>> cycloneSources(Fetcher f, Place p) => [
       if (isKorea(p)) Source('kma_typhoon', () => kmaTyphoon(f)),
     ];
 
+/// 시간대를 알려 준 출처가 없을 때: 폰과 가까운 경도면 폰 시간대, 멀면 경도/15 시간.
+// ponytail: 경도 추정은 서머타임·국경을 모른다(최대 1~2시간 차이), 정확히 하려면 시간대 경계 자료가 필요
+Duration guessOffset(double lon, Duration device) {
+  final est = Duration(hours: (lon / 15).round());
+  return (est - device).abs() <= const Duration(hours: 1) ? device : est;
+}
+
 Future<Report> loadReport(Fetcher f, Place p, {bool background = false, Duration? deviceOffset}) async {
   final (fc, air, cy) = await (
     Future.wait(forecastSources(f, p, background: background).map(runSource)),
@@ -82,8 +89,7 @@ Future<Report> loadReport(Fetcher f, Place p, {bool background = false, Duration
     Future.wait(cycloneSources(f, p).map(runSource)),
   ).wait;
   final offset = fc.map((r) => r.data?.utcOffset).whereType<Duration>().firstOrNull ??
-      deviceOffset ??
-      DateTime.now().timeZoneOffset;
+      guessOffset(p.lon, deviceOffset ?? DateTime.now().timeZoneOffset);
   // 일별을 안 주는 출처(MET·OWM)는 장소 시간대로 시간별을 묶어 채운다.
   final filled = [
     for (final r in fc)

@@ -94,16 +94,19 @@ void main() {
     expect(calls, 1);
   });
 
-  test('freshCap forces refetch of short-lived entries only', () async {
+  test('forced view refetches short-lived entries only and leaves the base fetcher alone', () async {
     var calls = 0;
     final f = Fetcher(MockClient((_) async => http.Response('b${++calls}', 200)), dir, now: () => now);
     final long = Uri.parse('https://example.com/stations');
     await f.get(url);
     await f.get(long, maxAge: const Duration(days: 30));
     now = now.add(const Duration(minutes: 6));
-    f.freshCap = const Duration(minutes: 5);
-    expect((await f.get(url)).body, 'b3');
-    expect((await f.get(long, maxAge: const Duration(days: 30))).body, 'b2');
+    final forced = f.forced(const Duration(minutes: 5));
+    expect((await forced.get(url)).body, 'b3');
+    expect((await forced.get(long, maxAge: const Duration(days: 30))).body, 'b2');
+    now = now.add(const Duration(minutes: 6));
+    expect((await f.get(url)).body, 'b3'); // 기본 요청기는 30분 그대로
+    expect(calls, 3);
   });
 
   test('check failure is not cached', () async {
