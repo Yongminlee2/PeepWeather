@@ -197,7 +197,7 @@ class _Hero extends StatelessWidget {
             child: SizedBox(height: 22, child: CustomPaint(size: Size.infinite, painter: _DotStrip(temps, mid))),
           ),
         ],
-        // 한눈에: 미세먼지 등급(측정소 우선)과 12시간 안 비 예보 기관 수
+        // 한눈에: 미세먼지 등급(측정소 우선). 비는 바로 아래 결론 카드에 있다
         const SizedBox(height: 14),
         Wrap(spacing: 8, runSpacing: 8, children: [
           if (airHeadline(r.air) case (final g, final measured))
@@ -205,22 +205,30 @@ class _Hero extends StatelessWidget {
               dot: gradeColor(g),
               text: '${l.heroAir(gradeText(l, g))} (${measured ? l.tagMeasured : l.tagModel})',
             ),
-          if (rainHeadline(r.forecasts, nowUtc) case (final wet, final n) when n > 0)
-            _Pill(
-              icon: Icons.water_drop,
-              text: wet == 0 ? l.heroNoRain : l.heroRain(n, wet),
-            ),
         ]),
         if (failed.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Wrap(spacing: 10, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            Text(l.notAvailable, style: TextStyle(fontSize: 12, color: soft)),
-            for (final MapEntry(key: id, value: fail) in failed.entries)
-              Text.rich(TextSpan(children: [
-                TextSpan(text: '${sourceLabel(l, id)} ', style: const TextStyle(fontSize: 12, color: fg)),
-                TextSpan(text: failText(l, fail), style: const TextStyle(fontSize: 12, color: Color(0xFFFFC9C2))),
-              ])),
-          ]),
+          const SizedBox(height: 10),
+          // 받지 못한 곳은 한 줄로 접고, 누르면 이유를 보여 준다
+          InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => _sheet(context, l.notAvailable, [
+              for (final MapEntry(key: id, value: fail) in failed.entries)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(children: [
+                    Expanded(child: Text(sourceLabel(l, id), style: TextStyle(color: wx(context).ink))),
+                    Text(failText(l, fail), style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                  ]),
+                ),
+            ]),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Text(l.notAvailableCount(failed.length), style: TextStyle(fontSize: 13, color: soft)),
+                Icon(Icons.chevron_right, size: 18, color: soft),
+              ]),
+            ),
+          ),
         ],
       ]),
     );

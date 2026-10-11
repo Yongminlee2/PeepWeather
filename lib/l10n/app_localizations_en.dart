@@ -578,4 +578,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String vTomorrowSplit(Object range) {
     return 'Tomorrow $range, rain forecasts split';
   }
+
+  @override
+  String get locating => 'Finding where you are';
+
+  @override
+  String notAvailableCount(Object n) {
+    return '$n unavailable';
+  }
 }

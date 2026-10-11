@@ -62,8 +62,13 @@ void main() {
     expect(find.text('서울'), findsOneWidget);
     expect(find.text('가운데 값'), findsWidgets);
     expect(find.textContaining('2곳 예보 범위'), findsOneWidget);
-    expect(find.text('받지 못한 곳'), findsOneWidget);
+    // 받지 못한 곳은 한 줄로 접혀 있고, 누르면 이유가 나온다
+    expect(find.text('받지 못한 곳 2곳'), findsOneWidget);
+    await tester.tap(find.text('받지 못한 곳 2곳'));
+    await tester.pumpAndSettle();
     expect(find.textContaining('설정 필요'), findsWidgets);
+    Navigator.of(tester.element(find.textContaining('설정 필요').first)).pop();
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('예보가 엇갈려요'), 300, scrollable: find.byType(Scrollable).first);
     expect(find.text('예보가 엇갈려요'), findsWidgets);
 

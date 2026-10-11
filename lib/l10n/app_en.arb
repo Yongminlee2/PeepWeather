@@ -163,5 +163,7 @@
  "vRainNone": "All {n} sources expect no rain",
  "vTomorrowLikely": "Tomorrow {range}, rain likely",
  "vTomorrowDry": "Tomorrow {range}, no rain expected",
- "vTomorrowSplit": "Tomorrow {range}, rain forecasts split"
+ "vTomorrowSplit": "Tomorrow {range}, rain forecasts split",
+ "locating": "Finding where you are",
+ "notAvailableCount": "{n} unavailable"
 }

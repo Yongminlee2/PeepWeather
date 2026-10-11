@@ -573,4 +573,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String vTomorrowSplit(Object range) {
     return '내일 $range, 비 예보가 갈려요';
   }
+
+  @override
+  String get locating => '지금 있는 곳을 확인하는 중';
+
+  @override
+  String notAvailableCount(Object n) {
+    return '받지 못한 곳 $n곳';
+  }
 }

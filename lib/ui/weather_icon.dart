@@ -32,12 +32,13 @@ List<Color> heroGradient(Sky s, {required bool night}) {
         ? const [Color(0xFF0E1A33), Color(0xFF2B4170)]
         : const [Color(0xFF1A2233), Color(0xFF3A4A63)];
   }
+  // 아래쪽도 흰 글씨가 읽힐 만큼 진하게(밝은 하늘색까지 가면 알약·작은 글씨가 묻힌다)
   return switch (s) {
-    Sky.clear => const [Color(0xFF2F78C2), Color(0xFF8EC5EE)],
-    Sky.partly => const [Color(0xFF4A80B4), Color(0xFFA7C7E3)],
-    Sky.cloudy || Sky.fog => const [Color(0xFF5E6F86), Color(0xFF9AAABD)],
-    Sky.rain || Sky.thunder => const [Color(0xFF3D4B60), Color(0xFF6E7F96)],
-    Sky.snow => const [Color(0xFF6F84A0), Color(0xFFC3D1E0)],
+    Sky.clear => const [Color(0xFF2565A8), Color(0xFF4F8FCB)],
+    Sky.partly => const [Color(0xFF34689C), Color(0xFF6194C2)],
+    Sky.cloudy || Sky.fog => const [Color(0xFF4F5F75), Color(0xFF7C8CA1)],
+    Sky.rain || Sky.thunder => const [Color(0xFF3D4B60), Color(0xFF627389)],
+    Sky.snow => const [Color(0xFF5B7090), Color(0xFF8DA3BE)],
   };
 }
 

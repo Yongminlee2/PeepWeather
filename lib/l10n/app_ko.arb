@@ -163,5 +163,7 @@
  "vRainNone": "{n}곳 모두 비가 없다고 봐요",
  "vTomorrowLikely": "내일 {range}, 비 올 가능성 높아요",
  "vTomorrowDry": "내일 {range}, 비 걱정 없어요",
- "vTomorrowSplit": "내일 {range}, 비 예보가 갈려요"
+ "vTomorrowSplit": "내일 {range}, 비 예보가 갈려요",
+ "locating": "지금 있는 곳을 확인하는 중",
+ "notAvailableCount": "받지 못한 곳 {n}곳"
 }

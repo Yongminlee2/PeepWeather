@@ -102,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ],
           ),
           body: ps.isEmpty
-              ? (st.locating || !_started ? const Center(child: CircularProgressIndicator()) : _NoLocation(onSearch: _search, onPick: _pick))
+              ? (st.locating || !_started ? _Waiting(l.locating) : _NoLocation(onSearch: _search, onPick: _pick))
               : Column(children: [
                   Expanded(
                     child: PageView.builder(
@@ -233,4 +233,28 @@ class _NoLocation extends StatelessWidget {
       ),
     ]);
   }
+}
+
+/// 기다리는 동안(위치 확인·권한 창 뒤)에도 빈 화면 대신 하늘 카드.
+class _Waiting extends StatelessWidget {
+  const _Waiting(this.text);
+  final String text;
+  @override
+  Widget build(BuildContext context) => ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 32), children: [
+        Container(
+          height: 260,
+          padding: const EdgeInsets.all(20),
+          alignment: Alignment.bottomLeft,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: const LinearGradient(
+                begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF24508A), Color(0xFF4A80B4)]),
+          ),
+          child: Row(children: [
+            const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white)),
+            const SizedBox(width: 12),
+            Flexible(child: Text(text, style: TextStyle(fontSize: 15, color: Colors.white.withValues(alpha: 0.9)))),
+          ]),
+        ),
+      ]);
 }

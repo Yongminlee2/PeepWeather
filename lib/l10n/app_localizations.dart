@@ -1081,6 +1081,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tomorrow {range}, rain forecasts split'**
   String vTomorrowSplit(Object range);
+
+  /// No description provided for @locating.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding where you are'**
+  String get locating;
+
+  /// No description provided for @notAvailableCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} unavailable'**
+  String notAvailableCount(Object n);
 }
 
 class _AppLocalizationsDelegate
