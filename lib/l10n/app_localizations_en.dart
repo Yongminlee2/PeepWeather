@@ -452,14 +452,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tagModel => 'model';
 
   @override
-  String heroRain(Object n, Object wet) {
-    return 'Rain in 12 h: $wet of $n';
-  }
-
-  @override
-  String get heroNoRain => 'No rain expected in 12 h';
-
-  @override
   String get verdictTitle => 'Bottom line';
 
   @override

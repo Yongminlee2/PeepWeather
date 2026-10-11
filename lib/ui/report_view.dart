@@ -237,10 +237,9 @@ class _Hero extends StatelessWidget {
 
 /// 하늘 카드 위의 작은 알약(반투명 흰 바탕).
 class _Pill extends StatelessWidget {
-  const _Pill({required this.text, this.dot, this.icon});
+  const _Pill({required this.text, this.dot});
   final String text;
   final Color? dot;
-  final IconData? icon;
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -248,7 +247,6 @@ class _Pill extends StatelessWidget {
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           if (dot != null)
             Container(width: 10, height: 10, decoration: BoxDecoration(color: dot, shape: BoxShape.circle)),
-          if (icon != null) Icon(icon, size: 14, color: Colors.white),
           const SizedBox(width: 6),
           Flexible(child: Text(text, style: const TextStyle(fontSize: 13, color: Colors.white))),
         ]),

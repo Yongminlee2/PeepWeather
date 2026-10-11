@@ -133,8 +133,6 @@
  "heroAir": "Air {grade}",
  "tagMeasured": "station",
  "tagModel": "model",
- "heroRain": "Rain in 12 h: {wet} of {n}",
- "heroNoRain": "No rain expected in 12 h",
  "verdictTitle": "Bottom line",
  "vConfHigh": "Sources agree closely",
  "vConfMedium": "Sources differ a little",

@@ -896,18 +896,6 @@ abstract class AppLocalizations {
   /// **'model'**
   String get tagModel;
 
-  /// No description provided for @heroRain.
-  ///
-  /// In en, this message translates to:
-  /// **'Rain in 12 h: {wet} of {n}'**
-  String heroRain(Object n, Object wet);
-
-  /// No description provided for @heroNoRain.
-  ///
-  /// In en, this message translates to:
-  /// **'No rain expected in 12 h'**
-  String get heroNoRain;
-
   /// No description provided for @verdictTitle.
   ///
   /// In en, this message translates to:

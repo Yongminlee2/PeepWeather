@@ -449,14 +449,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tagModel => '모델';
 
   @override
-  String heroRain(Object n, Object wet) {
-    return '12시간 안 비 예보 $n곳 중 $wet곳';
-  }
-
-  @override
-  String get heroNoRain => '12시간 안 비 예보 없음';
-
-  @override
   String get verdictTitle => '결론';
 
   @override

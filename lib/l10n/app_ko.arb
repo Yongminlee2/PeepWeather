@@ -133,8 +133,6 @@
  "heroAir": "미세먼지 {grade}",
  "tagMeasured": "측정소",
  "tagModel": "모델",
- "heroRain": "12시간 안 비 예보 {n}곳 중 {wet}곳",
- "heroNoRain": "12시간 안 비 예보 없음",
  "verdictTitle": "결론",
  "vConfHigh": "기관들이 거의 같게 봐요",
  "vConfMedium": "기관마다 조금씩 달라요",
