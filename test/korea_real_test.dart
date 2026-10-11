@@ -66,4 +66,8 @@ void main() {
     expect(fs.first.$1.isBefore(fs.last.$1), isTrue);
     expect(fs.every((f) => f.$2.toString().endsWith('.srv.png') && f.$2.scheme == 'https'), isTrue);
   });
+
+  test('KMA observation carries the last hour rain amount', () {
+    expect(parseKma(fx('kma_vilage_real.json'), fx('kma_ncst_real.json')).now!.mm, 0.0); // RN1 = 0
+  });
 }

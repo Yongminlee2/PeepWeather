@@ -187,4 +187,8 @@ void main() {
       expect(f.hours.every((h) => h.pop == null || (h.pop! >= 0 && h.pop! <= 100)), isTrue);
     });
   });
+
+  test('OpenWeather current carries rain amount (0 when none)', () {
+    expect(parseOwmForecast(fx('owm_forecast_real.json'), fx('owm_weather_real.json')).now!.mm, 0.0);
+  });
 }

@@ -458,4 +458,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get heroNoRain => 'No rain expected in 12 h';
+
+  @override
+  String get verdictTitle => 'Bottom line';
+
+  @override
+  String vNow(Object t) {
+    return 'Now $t';
+  }
+
+  @override
+  String vNowWeighted(Object t) {
+    return 'Now $t (weighted by local accuracy)';
+  }
+
+  @override
+  String get vConfHigh => 'Sources agree closely';
+
+  @override
+  String get vConfMedium => 'Sources differ a little';
+
+  @override
+  String get vConfLow => 'Sources differ a lot. Check the range below';
+
+  @override
+  String vTodayHigh(Object t) {
+    return 'High today around $t';
+  }
+
+  @override
+  String get vRainLikely => 'Rain is likely within 12 hours';
+
+  @override
+  String get vRainUnlikely => 'No rain expected within 12 hours';
+
+  @override
+  String get vRainSplit =>
+      'Rain forecasts are split. An umbrella is the safe bet';
+
+  @override
+  String vRainVotes(Object n, Object wet) {
+    return '$wet of $n sources expect rain';
+  }
+
+  @override
+  String vTomorrow(Object range) {
+    return 'Tomorrow $range';
+  }
+
+  @override
+  String vTomorrowRain(Object k, Object n) {
+    return '$k of $n sources give 50%+ chance of rain';
+  }
+
+  @override
+  String vBest(Object name) {
+    return 'Most accurate here: $name';
+  }
+
+  @override
+  String vBestDetail(Object err, Object n) {
+    return 'off by $err° on average, $n checks';
+  }
+
+  @override
+  String get vCollecting =>
+      'Collecting data on which source is most accurate here';
+
+  @override
+  String vCollectingDetail(Object n) {
+    return 'A ranking appears after about a day ($n checks so far)';
+  }
+
+  @override
+  String get infoTitleVerdict => 'How is the bottom line made?';
+
+  @override
+  String get infoVerdict =>
+      'Now: the middle value of all sources. Once enough local checks build up, sources that matched real observations get more weight.\n\nAgreement: the middle half within 1.5 °C means close, within 3 °C a little, otherwise a lot.\n\nRain: the hour in the next 12 with the most sources expecting rain. Over 60% means likely, 20% or less means none expected, otherwise split.\n\nMost accurate: the app saves each source\'s forecast about a day ahead and compares it with the real observation at that time (KMA stations in Korea, OpenWeather current values elsewhere). Checks build up when you open the app and during the 2-hourly alert check. Sources need 5+ checks to be ranked.';
+
+  @override
+  String get accuracyTitle => 'Local accuracy ranking';
+
+  @override
+  String accuracyRow(Object err) {
+    return 'off by $err°';
+  }
+
+  @override
+  String accuracyRain(Object pct) {
+    return 'rain right $pct%';
+  }
+
+  @override
+  String accuracyBasis(Object obs) {
+    return 'Day-ahead forecasts compared with $obs';
+  }
+
+  @override
+  String get obsKma => 'KMA station observations';
+
+  @override
+  String get obsOwm => 'OpenWeather current values';
 }

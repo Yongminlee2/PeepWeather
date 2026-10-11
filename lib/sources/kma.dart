@@ -92,7 +92,8 @@ Forecast parseKma(String vilageBody, String ncstBody) {
   final now = n['T1H'] == null
       ? null
       : Hour(_kstToUtc(first['baseDate'] as String, first['baseTime'] as String), double.parse(n['T1H']!),
-          pty > 0 ? kmaSky(4, pty) : (hours.isEmpty ? Sky.clear : hours.first.sky));
+          pty > 0 ? kmaSky(4, pty) : (hours.isEmpty ? Sky.clear : hours.first.sky),
+          mm: n['RN1'] == null ? null : pcpMm(n['RN1']!)); // 지난 1시간 실제 강수량(관측)
   return Forecast(now: now, hours: hours, days: days, utcOffset: kst);
 }
 

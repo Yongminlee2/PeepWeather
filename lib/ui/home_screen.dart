@@ -183,6 +183,7 @@ class _PlacePage extends StatelessWidget {
       onRefresh: () => st.refresh(place, force: true),
       child: ReportView(
         report: r,
+        ledger: st.ledgerFor(place),
         fahrenheit: st.settings.fahrenheit,
         onSatellite: onSatellite == null ? null : () => onSatellite!(context, place),
       ),

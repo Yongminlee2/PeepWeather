@@ -14,7 +14,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final settings = await Settings.load();
   final state = AppState(settings, await makeFetcher(),
-      onReport: (r) => syncWidget(r, settings.fahrenheit, deviceL10n()).ignore());
+      ledgerDir: await ledgerDirectory(), onReport: (r) => syncWidget(r, settings.fahrenheit, deviceL10n()).ignore());
   scheduleChecks().ignore(); // 알림 등록 실패가 앱 시작을 막지 않게
   runApp(WeatherApp(
       home: HomeScreen(

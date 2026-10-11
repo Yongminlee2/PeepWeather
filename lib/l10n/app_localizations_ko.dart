@@ -455,4 +455,104 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get heroNoRain => '12시간 안 비 예보 없음';
+
+  @override
+  String get verdictTitle => '결론';
+
+  @override
+  String vNow(Object t) {
+    return '지금 $t';
+  }
+
+  @override
+  String vNowWeighted(Object t) {
+    return '지금 $t (잘 맞춘 곳에 무게)';
+  }
+
+  @override
+  String get vConfHigh => '기관들이 거의 같게 봐요';
+
+  @override
+  String get vConfMedium => '기관마다 조금씩 달라요';
+
+  @override
+  String get vConfLow => '기관마다 많이 달라요. 아래 그래프에서 범위를 확인하세요';
+
+  @override
+  String vTodayHigh(Object t) {
+    return '오늘 최고 $t 안팎';
+  }
+
+  @override
+  String get vRainLikely => '12시간 안 비 올 가능성이 높아요';
+
+  @override
+  String get vRainUnlikely => '12시간 안 비 걱정은 없어요';
+
+  @override
+  String get vRainSplit => '비 예보가 갈려요. 우산을 챙기면 안전해요';
+
+  @override
+  String vRainVotes(Object n, Object wet) {
+    return '$n곳 중 $wet곳이 비 예보';
+  }
+
+  @override
+  String vTomorrow(Object range) {
+    return '내일 $range';
+  }
+
+  @override
+  String vTomorrowRain(Object k, Object n) {
+    return '강수확률 50% 넘게 본 곳 $n곳 중 $k곳';
+  }
+
+  @override
+  String vBest(Object name) {
+    return '이 동네에서 잘 맞춘 곳: $name';
+  }
+
+  @override
+  String vBestDetail(Object err, Object n) {
+    return '평균 $err° 차이, $n번 비교';
+  }
+
+  @override
+  String get vCollecting => '어느 기관이 잘 맞는지 비교 자료를 모으는 중';
+
+  @override
+  String vCollectingDetail(Object n) {
+    return '하루쯤 지나면 순위가 나와요 (지금까지 $n번 비교)';
+  }
+
+  @override
+  String get infoTitleVerdict => '결론은 어떻게 내나요?';
+
+  @override
+  String get infoVerdict =>
+      '지금 기온: 모든 기관의 가운데 값이에요. 이 동네에서 비교 자료가 쌓이면, 실제 관측과 잘 맞았던 기관에 더 큰 무게를 둔 값으로 바뀌어요.\n\n확신 정도: 가운데 절반의 기관끼리 1.5°C 안이면 \"거의 같게\", 3°C 안이면 \"조금씩\", 그보다 크면 \"많이 달라요\"예요.\n\n비: 앞으로 12시간 중 비 온다는 기관이 가장 많은 때를 봐요. 60% 넘는 기관이 비를 예보하면 \"가능성 높음\", 20% 이하면 \"걱정 없음\", 그 사이는 \"갈려요\"예요.\n\n잘 맞춘 곳: 앱이 각 기관의 하루쯤 전 예보를 저장해 두었다가, 그 시각이 되면 실제 관측(한국은 기상청 관측소, 해외는 OpenWeather 현재값)과 비교해요. 앱을 켤 때와 2시간마다 알림을 확인할 때 쌓이고, 5번 넘게 비교된 기관만 순위에 들어요.';
+
+  @override
+  String get accuracyTitle => '이 동네 정확도 순위';
+
+  @override
+  String accuracyRow(Object err) {
+    return '평균 $err° 차이';
+  }
+
+  @override
+  String accuracyRain(Object pct) {
+    return '비 맞춤 $pct%';
+  }
+
+  @override
+  String accuracyBasis(Object obs) {
+    return '하루쯤 전 예보를 $obs 관측과 비교했어요';
+  }
+
+  @override
+  String get obsKma => '기상청 관측소';
+
+  @override
+  String get obsOwm => 'OpenWeather 현재값';
 }

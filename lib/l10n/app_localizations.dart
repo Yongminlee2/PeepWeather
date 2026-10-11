@@ -907,6 +907,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No rain expected in 12 h'**
   String get heroNoRain;
+
+  /// No description provided for @verdictTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom line'**
+  String get verdictTitle;
+
+  /// No description provided for @vNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now {t}'**
+  String vNow(Object t);
+
+  /// No description provided for @vNowWeighted.
+  ///
+  /// In en, this message translates to:
+  /// **'Now {t} (weighted by local accuracy)'**
+  String vNowWeighted(Object t);
+
+  /// No description provided for @vConfHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources agree closely'**
+  String get vConfHigh;
+
+  /// No description provided for @vConfMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources differ a little'**
+  String get vConfMedium;
+
+  /// No description provided for @vConfLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources differ a lot. Check the range below'**
+  String get vConfLow;
+
+  /// No description provided for @vTodayHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High today around {t}'**
+  String vTodayHigh(Object t);
+
+  /// No description provided for @vRainLikely.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain is likely within 12 hours'**
+  String get vRainLikely;
+
+  /// No description provided for @vRainUnlikely.
+  ///
+  /// In en, this message translates to:
+  /// **'No rain expected within 12 hours'**
+  String get vRainUnlikely;
+
+  /// No description provided for @vRainSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain forecasts are split. An umbrella is the safe bet'**
+  String get vRainSplit;
+
+  /// No description provided for @vRainVotes.
+  ///
+  /// In en, this message translates to:
+  /// **'{wet} of {n} sources expect rain'**
+  String vRainVotes(Object n, Object wet);
+
+  /// No description provided for @vTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow {range}'**
+  String vTomorrow(Object range);
+
+  /// No description provided for @vTomorrowRain.
+  ///
+  /// In en, this message translates to:
+  /// **'{k} of {n} sources give 50%+ chance of rain'**
+  String vTomorrowRain(Object k, Object n);
+
+  /// No description provided for @vBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Most accurate here: {name}'**
+  String vBest(Object name);
+
+  /// No description provided for @vBestDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'off by {err}° on average, {n} checks'**
+  String vBestDetail(Object err, Object n);
+
+  /// No description provided for @vCollecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Collecting data on which source is most accurate here'**
+  String get vCollecting;
+
+  /// No description provided for @vCollectingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'A ranking appears after about a day ({n} checks so far)'**
+  String vCollectingDetail(Object n);
+
+  /// No description provided for @infoTitleVerdict.
+  ///
+  /// In en, this message translates to:
+  /// **'How is the bottom line made?'**
+  String get infoTitleVerdict;
+
+  /// No description provided for @infoVerdict.
+  ///
+  /// In en, this message translates to:
+  /// **'Now: the middle value of all sources. Once enough local checks build up, sources that matched real observations get more weight.\n\nAgreement: the middle half within 1.5 °C means close, within 3 °C a little, otherwise a lot.\n\nRain: the hour in the next 12 with the most sources expecting rain. Over 60% means likely, 20% or less means none expected, otherwise split.\n\nMost accurate: the app saves each source\'s forecast about a day ahead and compares it with the real observation at that time (KMA stations in Korea, OpenWeather current values elsewhere). Checks build up when you open the app and during the 2-hourly alert check. Sources need 5+ checks to be ranked.'**
+  String get infoVerdict;
+
+  /// No description provided for @accuracyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Local accuracy ranking'**
+  String get accuracyTitle;
+
+  /// No description provided for @accuracyRow.
+  ///
+  /// In en, this message translates to:
+  /// **'off by {err}°'**
+  String accuracyRow(Object err);
+
+  /// No description provided for @accuracyRain.
+  ///
+  /// In en, this message translates to:
+  /// **'rain right {pct}%'**
+  String accuracyRain(Object pct);
+
+  /// No description provided for @accuracyBasis.
+  ///
+  /// In en, this message translates to:
+  /// **'Day-ahead forecasts compared with {obs}'**
+  String accuracyBasis(Object obs);
+
+  /// No description provided for @obsKma.
+  ///
+  /// In en, this message translates to:
+  /// **'KMA station observations'**
+  String get obsKma;
+
+  /// No description provided for @obsOwm.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenWeather current values'**
+  String get obsOwm;
 }
 
 class _AppLocalizationsDelegate

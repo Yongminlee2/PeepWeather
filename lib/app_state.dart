@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -6,6 +8,7 @@ import 'models.dart';
 import 'repository.dart';
 import 'settings.dart';
 import 'sources/openweather.dart';
+import 'verify.dart';
 
 typedef Locator = Future<(double, double)?> Function();
 
@@ -28,7 +31,9 @@ Future<(double, double)?> deviceLocation() async {
 }
 
 class AppState extends ChangeNotifier {
-  AppState(this.settings, this.fetcher, {Locator? locator, this.onReport}) : _locator = locator ?? deviceLocation {
+  AppState(this.settings, this.fetcher, {Locator? locator, this.onReport, this.ledgerDir, DateTime Function()? clock})
+      : _locator = locator ?? deviceLocation,
+        _clock = clock ?? DateTime.now {
     // 섭씨/화씨를 바꾸면 위젯도 바로 다시 그리게
     settings.addListener(() {
       final r = places.isEmpty ? null : reportFor(places.first);
@@ -37,6 +42,8 @@ class AppState extends ChangeNotifier {
   }
   final void Function(Report r)? onReport; // 첫 장(현재 위치)을 새로 받았을 때 — 홈 화면 위젯 갱신
   final Settings settings;
+  final Directory? ledgerDir; // 이 동네 정확도 기록 폴더(없으면 기록 안 함)
+  final DateTime Function() _clock;
   final Fetcher fetcher;
   final Locator _locator;
 
@@ -44,10 +51,12 @@ class AppState extends ChangeNotifier {
   bool locationFailed = false;
   bool locating = false;
   final _reports = <String, Report>{};
+  final _ledgers = <String, Ledger>{};
   final _loading = <String>{};
 
   List<Place> get places => [?current, ...settings.places];
   Report? reportFor(Place p) => _reports[placeKey(p)];
+  Ledger? ledgerFor(Place p) => _ledgers[placeKey(p)];
   bool isLoading(Place p) => _loading.contains(placeKey(p));
 
   /// 없거나 가장 새 자료가 30분보다 오래됐으면 다시 받을 때.
@@ -88,6 +97,11 @@ class AppState extends ChangeNotifier {
     notifyListeners();
     try {
       final r = _reports[k] = await loadReport(force ? fetcher.forced(const Duration(minutes: 5)) : fetcher, p);
+      if (ledgerDir case final d?) {
+        try {
+          _ledgers[k] = await updateLedger(d, r, _clock().toUtc());
+        } catch (_) {} // 정확도 기록이 실패해도 날씨는 보여 준다
+      }
       if (places.isNotEmpty && placeKey(places.first) == k) onReport?.call(r);
     } finally {
       _loading.remove(k);

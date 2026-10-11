@@ -12,15 +12,19 @@ import 'detail_tables.dart';
 import 'format.dart';
 import 'theme.dart';
 import 'weather_icon.dart';
+import '../verdict.dart';
+import '../verify.dart';
 
 /// 장소 하나의 비교 화면. 한 가지를 보여준다: 기관들이 얼마나 맞는가.
 /// 지금(가운데 값과 범위) → 24시간 퍼짐 띠 → 5일 범위 막대 → 미세먼지 눈금 → 태풍 → 위성 → 표 전부 → 출처.
 class ReportView extends StatelessWidget {
-  const ReportView({super.key, required this.report, required this.fahrenheit, this.now, this.onSatellite});
+  const ReportView(
+      {super.key, required this.report, required this.fahrenheit, this.now, this.onSatellite, this.ledger});
   final Report report;
   final bool fahrenheit;
   final DateTime? now;
   final VoidCallback? onSatellite;
+  final Ledger? ledger; // 이 동네 정확도 기록(없으면 아직 모으는 중)
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +36,14 @@ class ReportView extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 40),
       children: [
         _Hero(r, fahrenheit, nowUtc),
+        if (verdict(r, ledger, nowUtc) case final v?)
+          _Section(l.verdictTitle, [_Verdict(v, r, fahrenheit)], info: (l.infoTitleVerdict, l.infoVerdict)),
         _Section(l.next24, [_Hours(r, fahrenheit, nowUtc)], info: (l.infoTitleHours, l.infoHours)),
         _Section(l.dailyTitle, [_Days(r, fahrenheit, nowUtc)], info: (l.infoTitlePop, l.infoPop)),
         _Section(l.airTitle, [_Air(r)], info: (l.infoTitleAir, l.infoAir)),
         _Section(l.stormTitle, [_Storms(r)]),
+        if (ledger case final led? when ranking(led).isNotEmpty)
+          _Section(l.accuracyTitle, [_Accuracy(led, isKorea(r.place))], info: (l.infoTitleVerdict, l.infoVerdict)),
         if (onSatellite != null)
           Padding(
             padding: const EdgeInsets.only(top: 20),
@@ -756,6 +764,138 @@ class _Storms extends StatelessWidget {
       for (final f in failed)
         Text('${sourceLabel(l, f.source)}: ${failText(l, f.fail!)}',
             style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.error)),
+    ]);
+  }
+}
+
+/// 결론 카드: 문장 몇 줄로 "그래서 어떻다는 건지".
+class _Verdict extends StatelessWidget {
+  const _Verdict(this.v, this.r, this.fahrenheit);
+  final Verdict v;
+  final Report r;
+  final bool fahrenheit;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final w = wx(context);
+    final t = tempText(v.tempNow, fahrenheit);
+    final conf = switch (v.tempConfidence) {
+      Confidence.high => l.vConfHigh,
+      Confidence.medium => l.vConfMedium,
+      Confidence.low => l.vConfLow,
+    };
+    final (wet, n) = v.rainVotes;
+    final rows = <(IconData, Color, String, String)>[
+      (
+        Icons.thermostat,
+        w.ink,
+        v.weighted ? l.vNowWeighted(t) : l.vNow(t),
+        [conf, if (v.todayHigh != null) l.vTodayHigh(tempText(v.todayHigh!, fahrenheit))].join('. '),
+      ),
+      if (n > 0)
+        (
+          Icons.umbrella,
+          v.rain == RainCall.split ? w.disagree : w.rain,
+          switch (v.rain) {
+            RainCall.likely => l.vRainLikely,
+            RainCall.unlikely => l.vRainUnlikely,
+            RainCall.split => l.vRainSplit,
+          },
+          l.vRainVotes(n, wet),
+        ),
+      if (v.tomorrow case final d?)
+        (
+          Icons.event,
+          w.ink,
+          l.vTomorrow('${tempText(d.medLow, fahrenheit)} ~ ${tempText(d.medHigh, fahrenheit)}'),
+          v.tomorrowRain == null ? '' : l.vTomorrowRain(v.tomorrowRain!.$1, v.tomorrowRain!.$2),
+        ),
+      if (v.best case (final id, final sc))
+        (Icons.verified, w.rain, l.vBest(sourceLabel(l, id)), l.vBestDetail(sc.mae.toStringAsFixed(1), sc.n))
+      else
+        (Icons.hourglass_top, w.muted, l.vCollecting, l.vCollectingDetail(v.comparisons)),
+    ];
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+      decoration: BoxDecoration(color: w.surface, borderRadius: BorderRadius.circular(18)),
+      child: Column(children: [
+        for (var i = 0; i < rows.length; i++) ...[
+          if (i > 0) Divider(height: 1, color: w.line),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Icon(rows[i].$1, color: rows[i].$2, size: 22),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(rows[i].$3, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: w.ink, fontFeatures: tabular)),
+                  if (rows[i].$4.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(rows[i].$4, style: TextStyle(fontSize: 13, height: 1.4, color: w.muted)),
+                    ),
+                ]),
+              ),
+            ]),
+          ),
+        ],
+      ]),
+    );
+  }
+}
+
+/// 이 동네 정확도 순위: 평균 오차 막대(짧을수록 잘 맞음)와 비 맞춘 비율.
+class _Accuracy extends StatelessWidget {
+  const _Accuracy(this.l, this.korea);
+  final Ledger l;
+  final bool korea;
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final w = wx(context);
+    final rank = ranking(l);
+    final worst = rank.map((e) => e.$2.mae).reduce(math.max);
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text(t.accuracyBasis(korea ? t.obsKma : t.obsOwm), style: TextStyle(fontSize: 12, color: w.muted)),
+      const SizedBox(height: 8),
+      for (final (i, (id, sc)) in rank.indexed)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(children: [
+            SizedBox(
+              width: 22,
+              child: Text('${i + 1}', style: TextStyle(fontWeight: FontWeight.w600, color: i == 0 ? w.rain : w.muted)),
+            ),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(sourceLabel(t, id), style: TextStyle(color: w.ink)),
+                const SizedBox(height: 4),
+                LayoutBuilder(
+                  builder: (context, box) => Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      height: 6,
+                      width: math.max(6, box.maxWidth * (worst == 0 ? 0 : sc.mae / worst)),
+                      decoration: BoxDecoration(
+                          color: i == 0 ? w.rain : w.band, borderRadius: BorderRadius.circular(3)),
+                    ),
+                  ),
+                ),
+              ]),
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              width: 96,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text(t.accuracyRow(sc.mae.toStringAsFixed(1)),
+                    style: TextStyle(fontSize: 13, color: w.ink, fontFeatures: tabular)),
+                Text(t.accuracyRain((sc.rainHitRate * 100).round()),
+                    style: TextStyle(fontSize: 11, color: w.muted, fontFeatures: tabular)),
+              ]),
+            ),
+          ]),
+        ),
     ]);
   }
 }

@@ -6,6 +6,7 @@ import 'package:weather_compare/repository.dart';
 import 'package:weather_compare/ui/format.dart';
 import 'package:weather_compare/ui/report_view.dart';
 import 'package:weather_compare/ui/weather_icon.dart';
+import 'package:weather_compare/verify.dart';
 import 'package:weather_compare/l10n/app_localizations.dart';
 
 final now = DateTime.utc(2026, 10, 11, 1, 20); // 서울 10:20
@@ -63,6 +64,7 @@ void main() {
     expect(find.textContaining('2곳 예보 범위'), findsOneWidget);
     expect(find.text('받지 못한 곳'), findsOneWidget);
     expect(find.textContaining('설정 필요'), findsWidgets);
+    await tester.scrollUntilVisible(find.text('예보가 엇갈려요'), 300, scrollable: find.byType(Scrollable).first);
     expect(find.text('예보가 엇갈려요'), findsWidgets);
 
     // 칸을 누르면 기관별 값
@@ -144,6 +146,7 @@ void main() {
     calm(tester);
     await pumpReport(tester);
     // 슬롯: 서울 12,15,18,21,0,3,6,9시 → 네 번째(21시)는 밤
+    await tester.scrollUntilVisible(find.text('비 온다고 한 기관'), 300, scrollable: find.byType(Scrollable).first);
     final cells = find.textContaining(RegExp(r'^(없음|\d+곳)$'));
     await tester.ensureVisible(cells.at(3));
     await tester.pumpAndSettle();
@@ -158,7 +161,41 @@ void main() {
     calm(tester);
     final h = tester.ensureSemantics();
     await pumpReport(tester);
+    await tester.scrollUntilVisible(find.text('비 온다고 한 기관'), 300, scrollable: find.byType(Scrollable).first);
     expect(find.bySemanticsLabel(RegExp('앞으로 24시간, 가운데 값: .+°')), findsOneWidget);
     h.dispose();
+  });
+
+  testWidgets('bottom-line card: now, rain call, and collecting note without history', (tester) async {
+    calm(tester);
+    await pumpReport(tester);
+    expect(find.text('결론'), findsOneWidget);
+    expect(find.textContaining('지금 '), findsWidgets);
+    expect(find.textContaining('비교 자료를 모으는 중'), findsOneWidget);
+    expect(find.textContaining(RegExp('비 (걱정|올 가능성|예보가 갈려요)')), findsOneWidget);
+  });
+
+  testWidgets('with history: most accurate source and the ranking section', (tester) async {
+    calm(tester);
+    final l = Ledger();
+    for (final (id, err) in [('met', 0.8), ('owm', 2.4)]) {
+      final sc = Score();
+      for (var i = 0; i < 6; i++) {
+        sc.add(err, i.isEven);
+      }
+      l.scores[id] = sc;
+    }
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(WeatherApp(
+        locale: const Locale('ko'),
+        home: Scaffold(body: ReportView(report: fakeReport(), fahrenheit: false, now: now, ledger: l))));
+    await tester.pumpAndSettle();
+    expect(find.text('이 동네에서 잘 맞춘 곳: 노르웨이 기상청'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('이 동네 정확도 순위'), 300, scrollable: find.byType(Scrollable).first);
+    expect(find.text('평균 0.8° 차이'), findsOneWidget);
+    expect(find.text('평균 2.4° 차이'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

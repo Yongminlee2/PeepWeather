@@ -31,7 +31,7 @@ Forecast parseOwmForecast(String forecastBody, String weatherBody) {
   ];
   final w = jsonDecode(weatherBody) as Map<String, dynamic>;
   return Forecast(
-      now: _hour(w),
+      now: _hour(w, mm: (toD(w['rain']?['1h']) ?? 0) + (toD(w['snow']?['1h']) ?? 0)),
       hours: hours,
       utcOffset: Duration(seconds: (fc['city']['timezone'] as num).toInt()));
 }

@@ -13,12 +13,16 @@ import 'alerts.dart';
 import 'fetcher.dart';
 import 'home_widget_sync.dart';
 import 'repository.dart';
+import 'verify.dart';
 import 'settings.dart';
 
 const checkTask = 'weather-check';
 
 Future<Fetcher> makeFetcher() async =>
     Fetcher(http.Client(), Directory('${(await getApplicationSupportDirectory()).path}/responses'));
+
+/// 이 동네 정확도 기록(기관별 하루 전 예보 vs 관측) 폴더.
+Future<Directory> ledgerDirectory() async => Directory('${(await getApplicationSupportDirectory()).path}/verify');
 
 final notifications = FlutterLocalNotificationsPlugin();
 
@@ -52,6 +56,9 @@ Future<bool> runCheck() async {
   final place = s.lastPos ?? s.places.firstOrNull;
   if (place == null) return true;
   final report = await loadReport(await makeFetcher(), place, background: true);
+  try {
+    await updateLedger(await ledgerDirectory(), report, DateTime.now().toUtc()); // 2시간마다 비교 자료가 쌓인다
+  } catch (_) {}
   final prefs = await SharedPreferences.getInstance();
   final sent = pruneSent((jsonDecode(prefs.getString('alertsSent') ?? '{}') as Map).cast<String, String>(), DateTime.now().toUtc());
   final l = deviceL10n();

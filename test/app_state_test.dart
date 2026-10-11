@@ -72,4 +72,16 @@ void main() {
     await s.update((s) => s.fahrenheit = true);
     expect(sent, 2);
   });
+
+  test('refresh keeps the local accuracy ledger up to date', () async {
+    final s = await Settings.load();
+    final ledgerDir = Directory('${dir.path}/verify');
+    final st = AppState(s, Fetcher(fakeNet(), dir),
+        locator: () async => (37.57, 126.98), ledgerDir: ledgerDir, clock: () => DateTime.utc(2026, 10, 11, 8));
+    await st.locate('ko', '현재 위치');
+    await st.refresh(st.current!);
+    expect(st.ledgerFor(st.current!), isNotNull);
+    expect(st.ledgerFor(st.current!)!.pending, isNotEmpty); // 시험 자료의 MET 예보가 저장됨
+    expect(ledgerDir.listSync(), isNotEmpty);
+  });
 }
