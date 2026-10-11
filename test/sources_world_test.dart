@@ -174,4 +174,17 @@ void main() {
       expect([a.pm10, a.pm25], [29.9, 29.4]);
     });
   });
+
+  group('Visual Crossing real response (2026-10-11, Seoul)', () {
+    test('15 days, 360 hours, current, +9 offset', () {
+      final f = parseVc(fx('vc_real.json'));
+      expect(f.days.length, 15);
+      expect(f.hours.length, 360);
+      expect(f.utcOffset, const Duration(hours: 9));
+      expect(f.now!.tempC, 23.9);
+      expect(f.now!.sky, Sky.partly);
+      expect(f.days.first.date, DateTime.utc(2026, 10, 11));
+      expect(f.hours.every((h) => h.pop == null || (h.pop! >= 0 && h.pop! <= 100)), isTrue);
+    });
+  });
 }
