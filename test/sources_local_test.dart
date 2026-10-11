@@ -108,7 +108,7 @@ void main() {
       expect(parseCommercialLicenses(fx('openaq_licenses.json')), {33, 40});
     });
     test('nearest commercial station with pm sensor', () {
-      final locs = parseLocations(fx('openaq_locations.json'), {33, 40}, now: DateTime.utc(2026, 10, 11, 10));
+      final locs = parseLocations(fx('openaq_locations.json'), {33, 40}, now: DateTime.utc(2026, 10, 11, 10), commercialOnly: true);
       expect(locs.map((l) => l.$1).toList(), [333, 222]);
       expect(locs.first.$3, {32: 'pm25'});
     });
@@ -128,11 +128,16 @@ void main() {
       expect(allowed, containsAll([10, 33, 38, 39, 41]));
       expect(allowed, isNot(contains(37)));
     });
-    test('Seoul: only unlicensed or long-stopped stations, so none usable', () {
-      expect(parseLocations(fx('openaq_locations_real.json'), allowed, now: now), isEmpty);
+    test('Seoul, commercial only: only unlicensed or long-stopped stations, so none usable', () {
+      expect(parseLocations(fx('openaq_locations_real.json'), allowed, now: now, commercialOnly: true), isEmpty);
+    });
+    test('Seoul, non-commercial: nearest station still measuring (stopped ones skipped)', () {
+      final locs = parseLocations(fx('openaq_locations_real.json'), allowed, now: now, commercialOnly: false);
+      expect(locs.first.$1, 2622782); // 동대문구 4.7km — 더 가까운 SPARTAN(2021)·고려대(2024)는 멈춤
+      expect(locs.first.$3.values.toSet(), {'pm10', 'pm25'});
     });
     test('Tokyo: nearest fresh licensed station with its pm sensor', () {
-      final locs = parseLocations(fx('openaq_locations_tokyo_real.json'), allowed, now: now);
+      final locs = parseLocations(fx('openaq_locations_tokyo_real.json'), allowed, now: now, commercialOnly: true);
       expect(locs.first.$1, 1214509);
       expect(locs.first.$3, {6520423: 'pm25'});
     });
