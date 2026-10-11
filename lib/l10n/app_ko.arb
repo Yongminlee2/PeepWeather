@@ -129,5 +129,10 @@
  "whereWeather": "어디 날씨를 볼까요?",
  "about": "정보",
  "widgetRange": "{n}곳 {range}",
- "loadingSources": "여러 기관에서 예보를 받아오는 중"
+ "loadingSources": "여러 기관에서 예보를 받아오는 중",
+ "heroAir": "미세먼지 {grade}",
+ "tagMeasured": "측정소",
+ "tagModel": "모델",
+ "heroRain": "12시간 안 비 예보 {n}곳 중 {wet}곳",
+ "heroNoRain": "12시간 안 비 예보 없음"
 }

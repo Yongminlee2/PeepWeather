@@ -129,5 +129,10 @@
  "whereWeather": "Where shall we look?",
  "about": "About",
  "widgetRange": "{n} sources {range}",
- "loadingSources": "Collecting forecasts from every source"
+ "loadingSources": "Collecting forecasts from every source",
+ "heroAir": "Air {grade}",
+ "tagMeasured": "station",
+ "tagModel": "model",
+ "heroRain": "Rain in 12 h: {wet} of {n}",
+ "heroNoRain": "No rain expected in 12 h"
 }

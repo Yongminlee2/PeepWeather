@@ -66,7 +66,10 @@ void main() {
     expect(find.text('예보가 엇갈려요'), findsWidgets);
 
     // 칸을 누르면 기관별 값
-    await tester.tap(find.textContaining(RegExp(r'^(없음|\d+곳)$')).first);
+    final cell = find.textContaining(RegExp(r'^(없음|\d+곳)$')).first;
+    await tester.ensureVisible(cell);
+    await tester.pumpAndSettle();
+    await tester.tap(cell);
     await tester.pumpAndSettle();
     expect(find.text('노르웨이 기상청'), findsWidgets);
     expect(find.text('OpenWeather'), findsWidgets);
@@ -142,10 +145,20 @@ void main() {
     await pumpReport(tester);
     // 슬롯: 서울 12,15,18,21,0,3,6,9시 → 네 번째(21시)는 밤
     final cells = find.textContaining(RegExp(r'^(없음|\d+곳)$'));
+    await tester.ensureVisible(cells.at(3));
+    await tester.pumpAndSettle();
     await tester.tap(cells.at(3));
     await tester.pumpAndSettle();
     final icons = tester.widgetList<WeatherIcon>(find.descendant(of: find.byType(BottomSheet), matching: find.byType(WeatherIcon)));
     expect(icons, isNotEmpty);
     expect(icons.every((i) => i.night), isTrue);
+  });
+
+  testWidgets('chart is readable by screen readers', (tester) async {
+    calm(tester);
+    final h = tester.ensureSemantics();
+    await pumpReport(tester);
+    expect(find.bySemanticsLabel(RegExp('앞으로 24시간, 가운데 값: .+°')), findsOneWidget);
+    h.dispose();
   });
 }

@@ -436,4 +436,23 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get loadingSources => '여러 기관에서 예보를 받아오는 중';
+
+  @override
+  String heroAir(Object grade) {
+    return '미세먼지 $grade';
+  }
+
+  @override
+  String get tagMeasured => '측정소';
+
+  @override
+  String get tagModel => '모델';
+
+  @override
+  String heroRain(Object n, Object wet) {
+    return '12시간 안 비 예보 $n곳 중 $wet곳';
+  }
+
+  @override
+  String get heroNoRain => '12시간 안 비 예보 없음';
 }

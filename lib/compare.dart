@@ -194,3 +194,28 @@ DaySpread? daySpread(List<Result<Forecast>> rs, DateTime date) {
       pops.isEmpty ? null : pops.first, pops.isEmpty ? null : pops.last, cells.length, sky,
       divergesDays([for (final c in cells) c.$2]), cells);
 }
+
+const _measuredAir = {'airkorea', 'openaq'};
+
+/// 맨 위에 보일 미세먼지 등급. 측정소 실측이 있으면 실측 중 더 나쁜 등급(실제로 잰 값이라 보수적으로),
+/// 없으면 모델들 등급의 가운데. (등급, 실측인가)
+(Grade, bool)? airHeadline(List<Result<Air>> rs) {
+  List<Grade> grades(bool measured) => [
+        for (final r in rs)
+          if (_measuredAir.contains(r.source) == measured && r.data != null) ?worstGrade(r.data!)
+      ];
+  final m = grades(true);
+  if (m.isNotEmpty) return (m.reduce((a, b) => a.index >= b.index ? a : b), true);
+  final g = grades(false)..sort((a, b) => a.index.compareTo(b.index));
+  return g.isEmpty ? null : (g[(g.length - 1) ~/ 2], false);
+}
+
+/// 앞으로 12시간 중 비 온다는 기관이 가장 많은 때의 (기관 수, 전체 기관 수).
+(int, int) rainHeadline(List<Result<Forecast>> rs, DateTime nowUtc) {
+  var best = (0, 0);
+  for (var h = 1; h <= 12; h++) {
+    final s = hourSpread(rs, nowUtc.add(Duration(hours: h)));
+    if (s != null && (s.wet > best.$1 || best.$2 == 0)) best = (s.wet, s.count);
+  }
+  return best;
+}

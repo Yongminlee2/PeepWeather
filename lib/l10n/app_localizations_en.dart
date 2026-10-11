@@ -439,4 +439,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loadingSources => 'Collecting forecasts from every source';
+
+  @override
+  String heroAir(Object grade) {
+    return 'Air $grade';
+  }
+
+  @override
+  String get tagMeasured => 'station';
+
+  @override
+  String get tagModel => 'model';
+
+  @override
+  String heroRain(Object n, Object wet) {
+    return 'Rain in 12 h: $wet of $n';
+  }
+
+  @override
+  String get heroNoRain => 'No rain expected in 12 h';
 }

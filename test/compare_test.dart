@@ -177,4 +177,31 @@ void main() {
       expect(quantile([1, 2, 3, 4], 0.75), 3.25);
     });
   });
+
+  group('headline summaries', () {
+    final t = DateTime.utc(2026, 10, 11, 0);
+    test('air headline prefers measured stations', () {
+      final h = airHeadline([
+        Result('owm', data: Air(pm10: 120, pm25: 90, time: t)), // 모델: 매우나쁨
+        Result('airkorea', data: Air(pm10: 25, pm25: 12, time: t)), // 실측: 좋음
+        Result('openaq', data: Air(pm25: 20, time: t)), // 실측: 보통
+      ])!;
+      expect(h.$2, isTrue); // 실측 기준
+      expect(h.$1, Grade.normal); // 실측 둘(좋음, 보통) 중 더 나쁜 쪽
+    });
+    test('air headline falls back to models', () {
+      final h = airHeadline([Result('owm', data: Air(pm10: 90, time: t)), Result('weatherapi', data: Air(pm10: 20, time: t))])!;
+      expect(h.$2, isFalse);
+      expect(h.$1, Grade.good); // 모델은 등급의 가운데(둘이면 낮은 쪽) — 한 모델이 튀어도 덜 흔들리게
+    });
+    test('rain headline: most sources expecting rain in the next 12 hours', () {
+      Result<Forecast> fc(String id, int pop3h) => Result(id,
+          data: Forecast(hours: [
+            Hour(t.add(const Duration(hours: 3)), 20, Sky.rain, pop: pop3h),
+            Hour(t.add(const Duration(hours: 15)), 20, Sky.rain, pop: 90), // 12시간 밖
+          ]));
+      final h = rainHeadline([fc('a', 70), fc('b', 10), fc('c', 60), const Result('d', fail: Fail.noKey)], t);
+      expect(h, (2, 3));
+    });
+  });
 }

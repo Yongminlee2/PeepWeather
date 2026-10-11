@@ -877,6 +877,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Collecting forecasts from every source'**
   String get loadingSources;
+
+  /// No description provided for @heroAir.
+  ///
+  /// In en, this message translates to:
+  /// **'Air {grade}'**
+  String heroAir(Object grade);
+
+  /// No description provided for @tagMeasured.
+  ///
+  /// In en, this message translates to:
+  /// **'station'**
+  String get tagMeasured;
+
+  /// No description provided for @tagModel.
+  ///
+  /// In en, this message translates to:
+  /// **'model'**
+  String get tagModel;
+
+  /// No description provided for @heroRain.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain in 12 h: {wet} of {n}'**
+  String heroRain(Object n, Object wet);
+
+  /// No description provided for @heroNoRain.
+  ///
+  /// In en, this message translates to:
+  /// **'No rain expected in 12 h'**
+  String get heroNoRain;
 }
 
 class _AppLocalizationsDelegate

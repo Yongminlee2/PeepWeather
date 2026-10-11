@@ -184,6 +184,20 @@ class _Hero extends StatelessWidget {
             child: SizedBox(height: 22, child: CustomPaint(size: Size.infinite, painter: _DotStrip(temps, mid))),
           ),
         ],
+        // 한눈에: 미세먼지 등급(측정소 우선)과 12시간 안 비 예보 기관 수
+        const SizedBox(height: 14),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          if (airHeadline(r.air) case (final g, final measured))
+            _Pill(
+              dot: gradeColor(g),
+              text: '${l.heroAir(gradeText(l, g))} (${measured ? l.tagMeasured : l.tagModel})',
+            ),
+          if (rainHeadline(r.forecasts, nowUtc) case (final wet, final n) when n > 0)
+            _Pill(
+              icon: Icons.water_drop,
+              text: wet == 0 ? l.heroNoRain : l.heroRain(n, wet),
+            ),
+        ]),
         if (failed.isNotEmpty) ...[
           const SizedBox(height: 12),
           Wrap(spacing: 10, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
@@ -198,6 +212,26 @@ class _Hero extends StatelessWidget {
       ]),
     );
   }
+}
+
+/// 하늘 카드 위의 작은 알약(반투명 흰 바탕).
+class _Pill extends StatelessWidget {
+  const _Pill({required this.text, this.dot, this.icon});
+  final String text;
+  final Color? dot;
+  final IconData? icon;
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(20)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          if (dot != null)
+            Container(width: 10, height: 10, decoration: BoxDecoration(color: dot, shape: BoxShape.circle)),
+          if (icon != null) Icon(icon, size: 14, color: Colors.white),
+          const SizedBox(width: 6),
+          Flexible(child: Text(text, style: const TextStyle(fontSize: 13, color: Colors.white))),
+        ]),
+      );
 }
 
 /// 기관별 지금 기온을 한 줄 눈금 위의 점으로. 가운데 값은 흰 세로 막대(하늘 배경 위).
@@ -320,7 +354,14 @@ class _Hours extends StatelessWidget {
       ]),
       LayoutBuilder(builder: (context, box) {
         final n = slots.length;
-        return GestureDetector(
+        // 화면 읽기: 그래프 대신 "21시 21도, 0시 19도 …" 로 읽어 준다
+        final spoken = [
+          for (var i = 0; i < n; i++)
+            if (sp[i] != null) '${hourLabel(i)} ${tempText(sp[i]!.median, fahrenheit)}'
+        ].join(', ');
+        return Semantics(
+          label: '${l.next24}, ${l.middleValue}: $spoken',
+          child: GestureDetector(
           onTapUp: (d) => open((d.localPosition.dx / box.maxWidth * n).floor().clamp(0, n - 1)),
           child: SizedBox(
             height: 190,
@@ -390,6 +431,7 @@ class _Hours extends StatelessWidget {
               betweenBarsData: [BetweenBarsData(fromIndex: 0, toIndex: 1, color: w.band.withValues(alpha: 0.6))],
             )),
           ),
+        ),
         );
       }),
       const SizedBox(height: 10),
