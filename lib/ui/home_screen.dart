@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../background.dart';
 import '../app_state.dart';
 import '../l10n/app_localizations.dart';
 import '../models.dart';
@@ -47,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _started = true;
     final l = AppLocalizations.of(context);
     final lang = Localizations.localeOf(context).languageCode;
+    _load(0); // 저장한 도시는 위치 확인(권한 창)을 기다리지 않고 바로 받는다
     st.locate(lang, l.currentLocation).then((_) {
       widget.afterLocate?.call();
       _load(0);
@@ -107,7 +109,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   tooltip: l.settings,
                   icon: const Icon(Icons.settings),
                   onPressed: () => Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (_) => SettingsScreen(settings: st.settings)))),
+                      .push(MaterialPageRoute(builder: (_) => SettingsScreen(
+                          settings: st.settings,
+                          notificationsOn: notificationsEnabled,
+                          turnOnNotifications: turnOnNotifications)))),
             ],
           ),
           body: ps.isEmpty

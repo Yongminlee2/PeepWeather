@@ -382,6 +382,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get popLabel => 'Chance of rain';
 
   @override
+  String get notifOff =>
+      'Notifications are off for this app on your phone, so alerts can\'t reach you.';
+
+  @override
+  String get notifTurnOn => 'Turn on';
+
+  @override
+  String get colTemp => 'Temp';
+
+  @override
+  String get colHiLo => 'High / Low';
+
+  @override
+  String get mmNote =>
+      'Values in mm are expected rain amounts from sources that give no chance of rain.';
+
+  @override
   String get pmUnit => 'µg/m³';
 
   @override
@@ -507,8 +524,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get vCollecting =>
-      'Collecting data on which source is most accurate here';
+  String get vCollecting => 'Finding the most accurate source here';
 
   @override
   String vCollectingDetail(Object n) {

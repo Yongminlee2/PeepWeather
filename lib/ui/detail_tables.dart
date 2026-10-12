@@ -45,7 +45,8 @@ class _Label extends StatelessWidget {
             ? l.asOf(localTime(result.asOf!, offset, Localizations.localeOf(context).toString(), 'HH:mm'))
             : null;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-      Text(sourceLabel(l, result.source), maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+      // 긴 이름은 괄호 앞에서 줄을 바꾼다("Météo-France(프 / 랑스)" 처럼 끊기지 않게)
+      Text(_wrapLabel(sourceLabel(l, result.source)), maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
       if (sub != null)
         Text(sub,
             maxLines: 1,
@@ -184,3 +185,4 @@ class _DayTable extends StatelessWidget {
   }
 }
 
+String _wrapLabel(String s) => s.length > 12 ? s.replaceFirst('(', '\n(') : s;

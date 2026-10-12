@@ -279,6 +279,19 @@ class _DotStrip extends CustomPainter {
   bool shouldRepaint(_DotStrip o) => o.values != values || o.mid != mid;
 }
 
+/// 기관별 시트의 칸 이름(오른쪽 두 칸 너비는 _sourceRow 와 같다).
+Widget _sheetHeader(BuildContext context, String main, String sub) {
+  final s = TextStyle(fontSize: 11, color: wx(context).muted);
+  return Padding(
+    padding: const EdgeInsets.only(top: 4, bottom: 2),
+    child: Row(children: [
+      const Spacer(),
+      SizedBox(width: 92, child: Text(main, textAlign: TextAlign.end, style: s)),
+      SizedBox(width: 56, child: Text(sub, textAlign: TextAlign.end, style: s)),
+    ]),
+  );
+}
+
 void _sheet(BuildContext context, String title, List<Widget> rows) => showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -294,19 +307,22 @@ void _sheet(BuildContext context, String title, List<Widget> rows) => showModalB
       ),
     );
 
-Widget _sourceRow(BuildContext context, String id, Sky sky, String main, String? sub, {bool night = false}) {
+Widget _sourceRow(BuildContext context, String id, Sky sky, String main, String? sub,
+    {bool night = false, bool subMuted = false}) {
   final w = wx(context);
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 7),
     child: Row(children: [
       Expanded(child: Text(sourceLabel(AppLocalizations.of(context), id), style: TextStyle(color: w.ink))),
-      WeatherIcon(sky, night: night, size: 30),
+      WeatherIcon(sky, night: night, size: 34, tile: true),
       SizedBox(
           width: 92,
           child: Text(main, textAlign: TextAlign.end, style: TextStyle(color: w.ink, fontFeatures: tabular, fontSize: 15))),
       SizedBox(
           width: 56,
-          child: Text(sub ?? '', textAlign: TextAlign.end, style: TextStyle(color: w.rain, fontFeatures: tabular, fontSize: 13))),
+          child: Text(sub ?? '',
+              textAlign: TextAlign.end,
+              style: TextStyle(color: subMuted ? w.muted : w.rain, fontFeatures: tabular, fontSize: 13))),
     ]),
   );
 }
@@ -337,11 +353,18 @@ class _Hours extends StatelessWidget {
     void open(int i) {
       final s = sp[i];
       if (s == null) return;
+      final mm = s.cells.any((c) => c.$2.pop == null && (c.$2.mm ?? 0) > 0);
       _sheet(context, l.sheetAt(localTime(slots[i], r.offset, loc, 'M/d HH:mm')), [
+        _sheetHeader(context, l.colTemp, l.popLabel),
         for (final (id, h) in s.cells)
           _sourceRow(context, id, h.sky, tempText(h.tempC, fahrenheit),
               h.pop != null ? '${h.pop}%' : (h.mm != null && h.mm! > 0 ? '${h.mm!.toStringAsFixed(1)}mm' : null),
-              night: isNightAt(slots[i], r.offset)),
+              night: isNightAt(slots[i], r.offset), subMuted: h.pop == null),
+        if (mm)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Text(l.mmNote, style: TextStyle(fontSize: 12, height: 1.4, color: wx(context).muted)),
+          ),
       ]);
     }
 
@@ -367,7 +390,7 @@ class _Hours extends StatelessWidget {
               child: sp[i] == null
                   ? const SizedBox(height: 34)
                   : WeatherIcon(majoritySky([for (final c in sp[i]!.cells) c.$2.sky]),
-                      night: isNightAt(slots[i], r.offset), size: 34),
+                      night: isNightAt(slots[i], r.offset), size: 34, tile: true),
             ),
           ),
       ]),
@@ -550,6 +573,7 @@ class _Days extends StatelessWidget {
           InkWell(
             borderRadius: BorderRadius.circular(10),
             onTap: () => _sheet(context, l.sheetAt(localTime(dates[i], Duration.zero, loc, 'M/d E')), [
+              _sheetHeader(context, l.colHiLo, l.popLabel),
               for (final (id, day) in d.cells.reversed)
                 _sourceRow(context, id, day.sky, '${tempText(day.maxC, fahrenheit)} / ${tempText(day.minC, fahrenheit)}',
                     day.pop == null ? null : '${day.pop}%'),
@@ -571,7 +595,7 @@ class _Days extends StatelessWidget {
                     Text(localTime(dates[i], Duration.zero, loc, 'M/d'), style: TextStyle(fontSize: 12, color: w.muted)),
                   ]),
                 ),
-                WeatherIcon(d.sky, size: 42),
+                WeatherIcon(d.sky, size: 42, tile: true),
                 SizedBox(width: 44, child: Text(tempText(d.medLow, fahrenheit), textAlign: TextAlign.end, style: numStyle)),
                 const SizedBox(width: 8),
                 Expanded(

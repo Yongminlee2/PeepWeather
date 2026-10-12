@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weather_compare/app_state.dart';
 import 'package:weather_compare/fetcher.dart';
 import 'package:weather_compare/main.dart';
+import 'package:weather_compare/models.dart';
 import 'package:weather_compare/settings.dart';
 import 'package:weather_compare/ui/home_screen.dart';
 import 'package:weather_compare/ui/search_screen.dart';
@@ -137,5 +139,60 @@ void main() {
     }
     expect(find.byTooltip('새로고침'), findsOneWidget); // 다 받으면 다시 버튼
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('saved city starts loading right away instead of offering retry while location is still being checked',
+      (tester) async {
+    late AppState st;
+    final asking = Completer<(double, double)?>(); // 위치 권한 창이 떠 있는 동안
+    await tester.runAsync(() async {
+      st = AppState(await Settings.load(), Fetcher(fakeNet(), dir), locator: () => asking.future);
+      await st.settings.update((s) => s.places = [const Place('부산', 'KR', 35.18, 129.08)]);
+    });
+    await pump(tester, HomeScreen(state: st));
+    await tester.pump();
+    expect(find.text('다시 시도'), findsNothing);
+    expect(st.isLoading(st.places.first), isTrue);
+    asking.complete(null);
+    for (var i = 0; i < 100 && st.isLoading(st.places.first); i++) {
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+  });
+
+  testWidgets('settings warns when the phone blocks notifications but alerts are on', (tester) async {
+    late Settings s;
+    await tester.runAsync(() async => s = await Settings.load());
+    var asked = 0;
+    var on = false;
+    await pump(
+        tester,
+        SettingsScreen(
+            settings: s,
+            notificationsOn: () async => on,
+            turnOnNotifications: () async {
+              asked++;
+              on = true;
+            }));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('알림이 꺼져 있어서'), findsOneWidget);
+    await tester.tap(find.text('알림 켜기'));
+    await tester.pumpAndSettle();
+    expect(asked, 1);
+    expect(find.textContaining('알림이 꺼져 있어서'), findsNothing); // 켠 뒤 다시 확인
+  });
+
+  testWidgets('no notification warning when every alert is off', (tester) async {
+    late Settings s;
+    await tester.runAsync(() async {
+      s = await Settings.load();
+      await s.update((x) => x
+        ..alertRain = false
+        ..alertAir = false
+        ..alertStorm = false);
+    });
+    await pump(tester, SettingsScreen(settings: s, notificationsOn: () async => false));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('알림이 꺼져 있어서'), findsNothing);
   });
 }

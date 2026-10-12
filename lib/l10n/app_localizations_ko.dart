@@ -380,6 +380,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get popLabel => '강수확률';
 
   @override
+  String get notifOff => '휴대폰에서 이 앱 알림이 꺼져 있어서 알림이 오지 않아요.';
+
+  @override
+  String get notifTurnOn => '알림 켜기';
+
+  @override
+  String get colTemp => '기온';
+
+  @override
+  String get colHiLo => '최고 / 최저';
+
+  @override
+  String get mmNote => 'mm로 적힌 곳은 확률 대신 예상 강수량을 주는 기관이에요.';
+
+  @override
   String get pmUnit => '㎍/㎥';
 
   @override
@@ -503,7 +518,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get vCollecting => '어느 기관이 잘 맞는지 비교 자료를 모으는 중';
+  String get vCollecting => '잘 맞는 기관을 가리는 중';
 
   @override
   String vCollectingDetail(Object n) {

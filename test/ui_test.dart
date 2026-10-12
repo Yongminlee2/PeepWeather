@@ -38,13 +38,13 @@ Report fakeReport() {
   );
 }
 
-Future<void> pumpReport(WidgetTester tester, {bool fahrenheit = false}) async {
+Future<void> pumpReport(WidgetTester tester, {bool fahrenheit = false, Report? report}) async {
   tester.view.physicalSize = const Size(360, 800);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(WeatherApp(
       locale: const Locale('ko'),
-      home: Scaffold(body: ReportView(report: fakeReport(), fahrenheit: fahrenheit, now: now))));
+      home: Scaffold(body: ReportView(report: report ?? fakeReport(), fahrenheit: fahrenheit, now: now))));
   await tester.pumpAndSettle();
 }
 
@@ -176,7 +176,7 @@ void main() {
     await pumpReport(tester);
     expect(find.text('결론'), findsOneWidget);
     expect(find.textContaining('가운데 절반이'), findsOneWidget);
-    expect(find.textContaining('비교 자료를 모으는 중'), findsOneWidget);
+    expect(find.text('잘 맞는 기관을 가리는 중'), findsOneWidget);
     expect(find.textContaining(RegExp('비 (걱정|올 가능성|예보가 갈려요)')), findsOneWidget);
   });
 
@@ -202,5 +202,38 @@ void main() {
     expect(find.text('평균 0.8° 차이'), findsOneWidget);
     expect(find.text('평균 2.4° 차이'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  Future<void> openHourSheet(WidgetTester tester, int i) async {
+    await tester.scrollUntilVisible(find.text('비 온다고 한 기관'), 300, scrollable: find.byType(Scrollable).first);
+    final cells = find.textContaining(RegExp(r'^(없음|\d+곳)$'));
+    await tester.ensureVisible(cells.at(i));
+    await tester.pumpAndSettle();
+    await tester.tap(cells.at(i));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('source sheets label their columns', (tester) async {
+    calm(tester);
+    await pumpReport(tester);
+    await openHourSheet(tester, 0);
+    final sheet = find.byType(BottomSheet);
+    expect(find.descendant(of: sheet, matching: find.text('기온')), findsOneWidget);
+    expect(find.descendant(of: sheet, matching: find.text('강수확률')), findsOneWidget);
+    expect(find.descendant(of: sheet, matching: find.textContaining('mm로 적힌 곳')), findsNothing); // 모두 확률을 줌
+  });
+
+  testWidgets('sheet explains mm when a source gives rain amount instead of chance', (tester) async {
+    calm(tester);
+    final r = fakeReport();
+    final met = r.forecasts.first.data!;
+    final wet = [for (final h in met.hours) Hour(h.time, h.tempC, Sky.rain, mm: 1.2)];
+    final report = Report(r.place, [Result('met', data: Forecast(now: met.now, hours: wet, days: met.days), asOf: now), ...r.forecasts.skip(1)],
+        r.air, r.cyclones, r.offset);
+    await pumpReport(tester, report: report);
+    await openHourSheet(tester, 0);
+    final sheet = find.byType(BottomSheet);
+    expect(find.descendant(of: sheet, matching: find.text('1.2mm')), findsOneWidget);
+    expect(find.descendant(of: sheet, matching: find.textContaining('mm로 적힌 곳')), findsOneWidget);
   });
 }

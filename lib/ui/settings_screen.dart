@@ -9,9 +9,39 @@ import 'theme.dart';
 
 const privacyUrl = 'https://yongminlee2.github.io/legal/peepweather/privacy.html';
 
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key, required this.settings});
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key, required this.settings, this.notificationsOn, this.turnOnNotifications});
   final Settings settings;
+  final Future<bool> Function()? notificationsOn; // 휴대폰이 이 앱 알림을 허락했나(없으면 허락한 걸로)
+  final Future<void> Function()? turnOnNotifications;
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _notifOn = true;
+  late final AppLifecycleListener _life;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+    _life = AppLifecycleListener(onResume: _check); // 휴대폰 설정에서 켜고 돌아오면 다시 확인
+  }
+
+  @override
+  void dispose() {
+    _life.dispose();
+    super.dispose();
+  }
+
+  Future<void> _check() async {
+    final on = await (widget.notificationsOn?.call() ?? Future.value(true));
+    if (mounted && on != _notifOn) setState(() => _notifOn = on);
+  }
+
+  Settings get settings => widget.settings;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +65,22 @@ class SettingsScreen extends StatelessWidget {
               toggle(l.alertRain, settings.alertRain, (s, x) => s.alertRain = x),
               toggle(l.alertAir, settings.alertAir, (s, x) => s.alertAir = x),
               toggle(l.alertStorm, settings.alertStorm, (s, x) => s.alertStorm = x),
+              if (!_notifOn && (settings.alertRain || settings.alertAir || settings.alertStorm))
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 8, 8),
+                  child: Row(children: [
+                    Icon(Icons.notifications_off_outlined, size: 20, color: w.disagree),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(l.notifOff, style: TextStyle(fontSize: 13, height: 1.4, color: w.ink))),
+                    TextButton(
+                      onPressed: () async {
+                        await widget.turnOnNotifications?.call();
+                        await _check();
+                      },
+                      child: Text(l.notifTurnOn),
+                    ),
+                  ]),
+                ),
             ]),
             _Group(title: l.savedPlaces, children: [
               if (settings.places.isEmpty)

@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -48,6 +49,20 @@ Future<void> askNotificationPermission() async {
   await notifications
       .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
       ?.requestPermissions(alert: true, sound: true);
+}
+
+Future<bool> notificationsEnabled() async {
+  await initNotifications();
+  return await notifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          ?.areNotificationsEnabled() ??
+      true;
+}
+
+/// 권한 창을 한 번 더 띄우고, 이미 두 번 거절해 창이 안 뜨면 휴대폰의 앱 설정 화면을 연다.
+Future<void> turnOnNotifications() async {
+  await askNotificationPermission();
+  if (!await notificationsEnabled()) await Geolocator.openAppSettings();
 }
 
 /// 마지막으로 앱에서 잡은 위치(없으면 첫 저장 도시)를 확인해 알림을 보낸다.

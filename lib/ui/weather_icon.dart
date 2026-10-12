@@ -44,15 +44,29 @@ List<Color> heroGradient(Sky s, {required bool night}) {
 
 /// 아이콘 하나. animate 가 꺼져 있거나 '동작 줄이기' 설정이면 멈춘 한 장면.
 class WeatherIcon extends StatelessWidget {
-  const WeatherIcon(this.sky, {super.key, this.night = false, this.size = 28, this.animate = true});
+  const WeatherIcon(this.sky, {super.key, this.night = false, this.size = 28, this.animate = true, this.tile = false});
   final Sky sky;
   final bool night;
   final double size;
   final bool animate;
+  final bool tile; // 밝은 바탕 위: 흰 구름이 묻히지 않게 그 하늘색 작은 판 위에 올린다
 
   @override
   Widget build(BuildContext context) {
     final move = animate && !MediaQuery.disableAnimationsOf(context);
+    if (tile) {
+      return Container(
+        width: size,
+        height: size,
+        padding: EdgeInsets.all(size * 0.08),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(size * 0.28),
+          gradient: LinearGradient(
+              begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: heroGradient(sky, night: night)),
+        ),
+        child: WeatherIcon(sky, night: night, size: size * 0.84, animate: animate),
+      );
+    }
     return Lottie.asset(
       skyAsset(sky, night: night),
       width: size,

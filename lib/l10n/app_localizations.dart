@@ -776,6 +776,36 @@ abstract class AppLocalizations {
   /// **'Chance of rain'**
   String get popLabel;
 
+  /// No description provided for @notifOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off for this app on your phone, so alerts can\'t reach you.'**
+  String get notifOff;
+
+  /// No description provided for @notifTurnOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on'**
+  String get notifTurnOn;
+
+  /// No description provided for @colTemp.
+  ///
+  /// In en, this message translates to:
+  /// **'Temp'**
+  String get colTemp;
+
+  /// No description provided for @colHiLo.
+  ///
+  /// In en, this message translates to:
+  /// **'High / Low'**
+  String get colHiLo;
+
+  /// No description provided for @mmNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Values in mm are expected rain amounts from sources that give no chance of rain.'**
+  String get mmNote;
+
   /// No description provided for @pmUnit.
   ///
   /// In en, this message translates to:
@@ -983,7 +1013,7 @@ abstract class AppLocalizations {
   /// No description provided for @vCollecting.
   ///
   /// In en, this message translates to:
-  /// **'Collecting data on which source is most accurate here'**
+  /// **'Finding the most accurate source here'**
   String get vCollecting;
 
   /// No description provided for @vCollectingDetail.
