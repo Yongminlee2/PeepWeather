@@ -34,13 +34,24 @@ Air parseAirKorea(String body, String station) {
   return Air(pm10: toD(it['pm10Value']), pm25: toD(it['pm25Value']), station: station, time: t);
 }
 
+/// 측정소 목록(약 670곳)을 300곳씩 나눠 받는다. 한 번에 1000곳을 달라면 서버가 504 로 끊는다(2026-10-12 확인).
+Future<List<(String, double, double)>> fetchStations(Fetcher f, Uri Function(Map<String, String> q) u) async {
+  const per = 300;
+  final out = <(String, double, double)>[];
+  for (var page = 1, total = per; (page - 1) * per < total; page++) {
+    final r = await f.get(u({'numOfRows': '$per', 'pageNo': '$page'}),
+        maxAge: const Duration(days: 30), check: checkDataGoKr);
+    total = (jsonDecode(r.body)['response']['body']['totalCount'] as num).toInt();
+    out.addAll(parseStations(r.body));
+  }
+  return out;
+}
+
 Future<Stamped<Air>> airKorea(Fetcher f, Place p) async {
   requireKey(Keys.dataGoKr);
   Uri u(String path, Map<String, String> q) => Uri.https('apis.data.go.kr', '/B552584/$path',
       {'serviceKey': Keys.dataGoKr, 'returnType': 'json', 'pageNo': '1', ...q});
-  final st = await f.get(u('MsrstnInfoInqireSvc/getMsrstnList', {'numOfRows': '1000'}),
-      maxAge: const Duration(days: 30), check: checkDataGoKr);
-  final name = nearestStation(parseStations(st.body), p.lat, p.lon);
+  final name = nearestStation(await fetchStations(f, (q) => u('MsrstnInfoInqireSvc/getMsrstnList', q)), p.lat, p.lon);
   final r = await f.get(u('ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty',
       {'numOfRows': '1', 'stationName': name, 'dataTerm': 'DAILY', 'ver': '1.3'}), check: checkDataGoKr);
   return (parseAirKorea(r.body, name), r.at);

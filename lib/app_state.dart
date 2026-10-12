@@ -1,6 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'fetcher.dart';
@@ -14,12 +15,33 @@ typedef Locator = Future<(double, double)?> Function();
 
 String placeKey(Place p) => '${p.lat.toStringAsFixed(3)},${p.lon.toStringAsFixed(3)}';
 
+/// 권한 창을 뒤로가기로 닫으면 geolocator 가 답을 영영 안 준다(빈 결과를 무시).
+/// 그래서 앱이 다시 앞으로 오면 잠깐 기다렸다가 직접 다시 확인한다.
+Future<T> answerOrRecheck<T>(Future<T> answer, Future<void> cameBack, Future<T> Function() recheck) =>
+    Future.any([answer, cameBack.then((_) => Future.delayed(const Duration(milliseconds: 500), recheck))]);
+
+Future<LocationPermission> _askPermission() async {
+  final back = Completer<void>();
+  var left = false;
+  final listener = AppLifecycleListener(
+    onInactive: () => left = true,
+    onResume: () {
+      if (left && !back.isCompleted) back.complete();
+    },
+  );
+  try {
+    return await answerOrRecheck(Geolocator.requestPermission(), back.future, Geolocator.checkPermission);
+  } finally {
+    listener.dispose();
+  }
+}
+
 /// 대략 위치(COARSE)만. 꺼져 있거나 거절하면 null.
 Future<(double, double)?> deviceLocation() async {
   try {
     if (!await Geolocator.isLocationServiceEnabled()) return null;
     var perm = await Geolocator.checkPermission();
-    if (perm == LocationPermission.denied) perm = await Geolocator.requestPermission();
+    if (perm == LocationPermission.denied) perm = await _askPermission();
     if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) return null;
     final pos = await Geolocator.getCurrentPosition(
             locationSettings: const LocationSettings(accuracy: LocationAccuracy.low, timeLimit: Duration(seconds: 15)))

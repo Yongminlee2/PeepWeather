@@ -1,4 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
+
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:weather_compare/fetcher.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weather_compare/models.dart';
@@ -69,5 +74,22 @@ void main() {
 
   test('KMA observation carries the last hour rain amount', () {
     expect(parseKma(fx('kma_vilage_real.json'), fx('kma_ncst_real.json')).now!.mm, 0.0); // RN1 = 0
+  });
+
+  test('station list is fetched in pages: one big page times out on the real server (504)', () async {
+    final dir = Directory.systemTemp.createTempSync('stations');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final all = [for (var i = 0; i < 672; i++) {'stationName': 's$i', 'dmX': '${33 + i * 0.005}', 'dmY': '127.0'}];
+    final net = MockClient((r) async {
+      final n = int.parse(r.url.queryParameters['numOfRows']!), page = int.parse(r.url.queryParameters['pageNo']!);
+      if (n > 700) return http.Response('', 504);
+      final items = all.skip((page - 1) * n).take(n).toList();
+      return http.Response(
+          jsonEncode({'response': {'header': {'resultCode': '00'}, 'body': {'totalCount': all.length, 'items': items}}}), 200);
+    });
+    Uri u(Map<String, String> q) => Uri.https('apis.data.go.kr', '/B552584/MsrstnInfoInqireSvc/getMsrstnList', q);
+    final s = await fetchStations(Fetcher(net, dir), u);
+    expect(s.length, 672);
+    expect(s.last.$1, 's671');
   });
 }

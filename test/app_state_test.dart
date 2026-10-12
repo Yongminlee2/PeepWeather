@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -83,5 +84,17 @@ void main() {
     expect(st.ledgerFor(st.current!), isNotNull);
     expect(st.ledgerFor(st.current!)!.pending, isNotEmpty); // 시험 자료의 MET 예보가 저장됨
     expect(ledgerDir.listSync(), isNotEmpty);
+  });
+
+  test('permission prompt closed with back: the plugin never answers, so re-check when the app comes back', () async {
+    final never = Completer<String>().future; // 뒤로가기로 닫으면 플러그인이 답을 안 준다
+    final back = Completer<void>();
+    final answer = answerOrRecheck(never, back.future, () async => 'denied');
+    back.complete();
+    expect(await answer.timeout(const Duration(seconds: 2)), 'denied');
+  });
+
+  test('permission prompt answered normally: the plugin answer wins', () async {
+    expect(await answerOrRecheck(Future.value('granted'), Completer<void>().future, () async => 'denied'), 'granted');
   });
 }
