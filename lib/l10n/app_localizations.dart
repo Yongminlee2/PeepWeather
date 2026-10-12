@@ -254,6 +254,12 @@ abstract class AppLocalizations {
   /// **'Search city'**
   String get search;
 
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:

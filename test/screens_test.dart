@@ -116,4 +116,26 @@ void main() {
     expect(find.text('제주'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('refresh button in the top bar reloads the city on screen', (tester) async {
+    late AppState st;
+    await tester.runAsync(() async {
+      st = AppState(await Settings.load(), Fetcher(fakeNet(), dir), locator: () async => (37.57, 126.98));
+    });
+    await pump(tester, HomeScreen(state: st));
+    for (var i = 0; i < 100 && (st.places.isEmpty || st.isLoading(st.places.first)); i++) {
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    final place = st.places.first;
+    expect(st.isLoading(place), isFalse);
+    await tester.tap(find.byTooltip('새로고침'));
+    expect(st.isLoading(place), isTrue);
+    for (var i = 0; i < 100 && st.isLoading(place); i++) {
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(find.byTooltip('새로고침'), findsOneWidget); // 다 받으면 다시 버튼
+    expect(tester.takeException(), isNull);
+  });
 }

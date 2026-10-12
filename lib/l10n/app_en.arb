@@ -26,6 +26,7 @@
  "failNetwork": "Check connection",
  "failParse": "Unavailable",
  "search": "Search city",
+ "refresh": "Refresh",
  "settings": "Settings",
  "locationNeeded": "Your location isn't available. Pick a city below or search.",
  "openLocationSettings": "Open location settings",

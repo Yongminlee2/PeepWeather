@@ -93,6 +93,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           appBar: AppBar(
             title: Text(l.appTitle),
             actions: [
+              if (ps.isNotEmpty)
+                st.isLoading(ps[_page])
+                    ? const Padding(
+                        padding: EdgeInsets.all(14),
+                        child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
+                    : IconButton(
+                        tooltip: l.refresh,
+                        icon: const Icon(Icons.refresh),
+                        onPressed: () => st.refresh(ps[_page], force: true)),
               IconButton(tooltip: l.search, icon: const Icon(Icons.search), onPressed: _search),
               IconButton(
                   tooltip: l.settings,
@@ -167,7 +176,9 @@ class _PlacePage extends StatelessWidget {
                 const SizedBox(
                     width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white)),
                 const SizedBox(width: 12),
-                Text(l.loadingSources, style: TextStyle(fontSize: 15, color: Colors.white.withValues(alpha: 0.9))),
+                Expanded(
+                    child: Text(l.loadingSources,
+                        style: TextStyle(fontSize: 15, color: Colors.white.withValues(alpha: 0.9)))),
               ])
             else
               FilledButton(

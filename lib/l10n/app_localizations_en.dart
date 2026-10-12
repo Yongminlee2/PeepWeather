@@ -93,6 +93,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search => 'Search city';
 
   @override
+  String get refresh => 'Refresh';
+
+  @override
   String get settings => 'Settings';
 
   @override

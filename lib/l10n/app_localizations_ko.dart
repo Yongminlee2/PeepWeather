@@ -93,6 +93,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get search => '도시 검색';
 
   @override
+  String get refresh => '새로고침';
+
+  @override
   String get settings => '설정';
 
   @override
