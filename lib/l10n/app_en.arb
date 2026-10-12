@@ -113,6 +113,7 @@
  "rainCount": "{wet}",
  "noneShort": "none",
  "popLabel": "Chance of rain",
+ "satLoading": "Loading satellite images",
  "notifOff": "Notifications are off for this app on your phone, so alerts can't reach you.",
  "notifTurnOn": "Turn on",
  "colTemp": "Temp",

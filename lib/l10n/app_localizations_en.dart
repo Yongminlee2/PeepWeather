@@ -382,6 +382,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get popLabel => 'Chance of rain';
 
   @override
+  String get satLoading => 'Loading satellite images';
+
+  @override
   String get notifOff =>
       'Notifications are off for this app on your phone, so alerts can\'t reach you.';
 

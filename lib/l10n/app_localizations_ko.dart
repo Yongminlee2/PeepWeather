@@ -380,6 +380,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get popLabel => '강수확률';
 
   @override
+  String get satLoading => '위성 사진 받는 중';
+
+  @override
   String get notifOff => '휴대폰에서 이 앱 알림이 꺼져 있어서 알림이 오지 않아요.';
 
   @override

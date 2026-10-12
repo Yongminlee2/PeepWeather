@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:weather_compare/models.dart';
 import 'package:weather_compare/sources/satellite.dart';
 
@@ -66,5 +68,33 @@ void main() {
 
   test('coastlines come from the layer that actually has lines', () {
     expect(coastlinesUrl, contains('Coastlines_15m'));
+  });
+
+  group('newest published picture', () {
+    const seoul = Place('서울', 'KR', 37.57, 126.98);
+    final ir = satLayersFor(seoul).first;
+    final now = DateTime.utc(2026, 10, 12, 11, 55);
+
+    test('steps back from now in 10 minutes until the picture over the place exists', () async {
+      final asked = <String>[];
+      final net = MockClient((r) async {
+        asked.add(r.url.path);
+        // 11:30 까지만 공개됨, 서울은 3단계 지도에서 (6, 3) 칸
+        expect(r.url.path, endsWith('/3/3/6.png'));
+        return http.Response('', r.url.path.contains('T11:50') || r.url.path.contains('T11:40') ? 404 : 200);
+      });
+      expect(await latestPublished(net, ir, now, seoul), DateTime.utc(2026, 10, 12, 11, 30));
+      expect(asked.length, 3);
+    });
+
+    test('gives up (null) when nothing answers within three hours', () async {
+      final net = MockClient((r) async => http.Response('', 404));
+      expect(await latestPublished(net, ir, now, seoul), isNull);
+    });
+
+    test('frames can end at the newest published picture', () {
+      final f = satFrames(DateTime.utc(2026, 10, 12, 11, 30), count: 2, lag: Duration.zero);
+      expect(f, [DateTime.utc(2026, 10, 12, 11, 20), DateTime.utc(2026, 10, 12, 11, 30)]);
+    });
   });
 }

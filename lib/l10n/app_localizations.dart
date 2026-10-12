@@ -776,6 +776,12 @@ abstract class AppLocalizations {
   /// **'Chance of rain'**
   String get popLabel;
 
+  /// No description provided for @satLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading satellite images'**
+  String get satLoading;
+
   /// No description provided for @notifOff.
   ///
   /// In en, this message translates to:

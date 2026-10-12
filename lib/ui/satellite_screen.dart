@@ -11,6 +11,32 @@ import '../models.dart';
 import '../sources/satellite.dart';
 import 'format.dart';
 
+/// 장면(프레임)마다 화면에 나온 지도 조각이 다 받아졌는지. 다 받은 장면만 재생에 쓴다.
+class FrameReadiness {
+  final _tiles = <int, Map<Object, bool>>{};
+
+  /// 바뀐 게 있으면 true.
+  bool mark(int frame, Object tile, bool loaded) {
+    final m = _tiles[frame] ??= {};
+    if (m[tile] == loaded) return false;
+    m[tile] = loaded;
+    return true;
+  }
+
+  bool ready(int frame) => _tiles[frame]?.isNotEmpty == true && _tiles[frame]!.values.every((v) => v);
+
+  /// [from] 다음으로 준비된 장면(한 바퀴 돌아도 없으면 그대로).
+  int next(int from, int n) {
+    for (var k = 1; k <= n; k++) {
+      if (ready((from + k) % n)) return (from + k) % n;
+    }
+    return from;
+  }
+
+  /// 지도를 움직이면 보이는 조각이 바뀌니 처음부터 다시 센다(곧바로 다시 채워진다).
+  void clear() => _tiles.clear();
+}
+
 /// 위성 구름 지도. 정지위성·천리안은 프레임을 모두 미리 받아 겹쳐 두고 보이는 것만 바꿔서
 /// 영상처럼 끊김 없이 돈다. 화면을 열면 저절로 재생되고, 지금 보이는 사진의 시각을 늘 보여준다.
 class SatelliteScreen extends StatefulWidget {
@@ -31,16 +57,25 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
   List<(DateTime, Uri)> _kmaFrames = const [];
   int _frame = 0;
   Timer? _timer;
+  final _ready = FrameReadiness();
+  bool _refresh = false; // 조각 상태가 바뀌어 다음 장면에 다시 그려야 함
+  bool _all = false; // 가장 최근 장면을 다 받아서 나머지 장면도 받기 시작했나(지도를 움직여도 유지)
+  final _latest = <SatKind, DateTime?>{}; // NASA 에 실제로 올라온 가장 최근 시각(못 알아내면 null → 고정 지연)
+
+  /// NASA 정지위성 레이어: 몇 분 늦게 올라오는지가 그때그때 달라서 실제 최신 시각을 물어본다.
+  bool get _askLatest => _sel.animated && _sel.wmsLayer == null && _sel.kind != SatKind.kma;
+  bool get _waiting => _askLatest && !_latest.containsKey(_sel.kind);
 
   DateTime get _now => (widget.now ?? DateTime.now()).toUtc();
   Duration get _offset => widget.offset ?? DateTime.now().timeZoneOffset;
 
   /// 지금 고른 레이어의 프레임 시각들(오래된 것 먼저).
-  List<DateTime> get _times => _sel.kind == SatKind.kma
-      ? [for (final f in _kmaFrames) f.$1]
-      : _sel.animated
-          ? satFrames(_now, lag: _sel.lag)
-          : const [];
+  List<DateTime> get _times {
+    if (_sel.kind == SatKind.kma) return [for (final f in _kmaFrames) f.$1];
+    if (_waiting || !_sel.animated) return const [];
+    final t = _latest[_sel.kind];
+    return t != null ? satFrames(t, lag: Duration.zero) : satFrames(_now, lag: _sel.lag);
+  }
 
   @override
   void initState() {
@@ -58,6 +93,8 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
     _timer?.cancel();
     _timer = null;
     _sel = layer;
+    _ready.clear();
+    _all = false;
     if (layer.kind == SatKind.kma) {
       _kma ??= kmaSatFrames(widget.fetcher).then((fs) {
         if (mounted) {
@@ -72,6 +109,16 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
       _frame = _kmaFrames.isEmpty ? 0 : _kmaFrames.length - 1;
       if (_kmaFrames.isNotEmpty) _play();
     } else {
+      if (_waiting) {
+        final kind = layer.kind;
+        latestPublished(widget.fetcher.client, layer, _now, widget.place).then((t) {
+          if (!mounted) return;
+          setState(() {
+            _latest[kind] = t;
+            if (_sel.kind == kind) _frame = _times.length - 1;
+          });
+        });
+      }
       _frame = _times.isEmpty ? 0 : _times.length - 1; // 처음엔 가장 최근 사진
       if (layer.animated) _play();
     }
@@ -89,7 +136,9 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
         return;
       }
       hold = 0;
-      setState(() => _frame = (_frame + 1) % n);
+      // 다 받지 못한 장면은 건너뛴다(검은 네모 대신)
+      final next = _sel.kind == SatKind.kma ? (_frame + 1) % n : _ready.next(_frame, n);
+      if (next != _frame) setState(() => _frame = next);
     });
     if (mounted) setState(() {});
   }
@@ -224,9 +273,10 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
             maxScale: 6,
             child: Stack(fit: StackFit.expand, children: [
               // 모든 장면을 미리 받아 겹쳐 두고 지금 장면만 보이게(깜빡임 없이 넘어간다)
-              for (var i = 0; i < _kmaFrames.length; i++)
+              // 가장 최근 장면을 늘 밑에: 아직 못 받은 장면 자리에 빈 화면 대신 이게 보인다
+              for (final i in [_kmaFrames.length - 1, for (var j = 0; j < _kmaFrames.length - 1; j++) j])
                 Opacity(
-                  opacity: i == _frame ? 1 : 0,
+                  opacity: i == _frame || i == _kmaFrames.length - 1 ? 1 : 0,
                   child: Image.network(_kmaFrames[i].$2.toString(),
                       cacheWidth: w, gaplessPlayback: true, fit: BoxFit.contain, errorBuilder: (_, _, _) => const SizedBox()),
                 ),
@@ -236,6 +286,11 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
       );
     }
     if (owm && Keys.owm.isEmpty) return Center(child: Text(l.failNoKey));
+    if (_waiting) {
+      return ColoredBox(
+          color: const Color(0xFF16202E),
+          child: Center(child: Text(l.satLoading, style: const TextStyle(color: Colors.white70))));
+    }
     final ts = _times;
     final frames = ts.isEmpty ? <DateTime?>[null] : ts;
     return Stack(children: [
@@ -245,12 +300,19 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
           initialZoom: 4,
           minZoom: 1,
           maxZoom: 10,
-          backgroundColor: Colors.black,
+          backgroundColor: const Color(0xFF16202E),
+          onPositionChanged: (_, _) => _ready.clear(), // 보이는 조각이 바뀐다
         ),
         children: [
-          // 모든 프레임의 지도 조각을 미리 받아 겹쳐 두고 지금 장면만 보이게
-          for (var i = 0; i < frames.length; i++)
-            Opacity(opacity: ts.isEmpty || i == _frame ? 1 : 0, child: _tiles(frames[i])),
+          // 가장 최근 장면은 늘 밑에 깔아 둔다: 다른 장면의 조각이 아직 없으면 검은 칸 대신 이게 보인다
+          _tiles(frames.last, frames.length - 1),
+          // 나머지 장면은 가장 최근 것을 다 받은 뒤에 받는다(한꺼번에 12장을 받으면 다 같이 느려진다).
+          // 지금 장면까지를 차례로 겹쳐서, 어느 장면에 빠진 조각(아직 공개 안 된 칸)이 있으면 바로 앞 장면이 보인다
+          if (_all || (_all = _ready.ready(frames.length - 1))) ...[
+            for (var i = 0; i < frames.length - 1; i++)
+              Opacity(opacity: i <= _frame ? 1 : 0, child: _tiles(frames[i], i)),
+            Opacity(opacity: _frame == frames.length - 1 ? 1 : 0, child: _tiles(frames.last, frames.length - 1)),
+          ],
           // 회색 위성 사진 위에서도 보이게 해안선을 노랗게
           ColorFiltered(
             colorFilter: const ColorFilter.mode(Color(0xFFFFE066), BlendMode.srcIn),
@@ -263,6 +325,22 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
           ]),
         ],
       ),
+      if (!_ready.ready(frames.length - 1))
+        Positioned(
+          top: 12,
+          right: 12,
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(8)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+                const SizedBox(width: 8),
+                Text(l.satLoading, style: const TextStyle(color: Colors.white, fontSize: 13)),
+              ]),
+            ),
+          ),
+        ),
       if (_sel.kind == SatKind.visible && _night)
         Positioned(
           bottom: 8,
@@ -273,10 +351,21 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
     ]);
   }
 
-  Widget _tiles(DateTime? t) {
+  Widget _tiles(DateTime? t, int frame) {
     final wms = _sel.wmsLayer;
     final url = _sel.urlAt(t);
     return TileLayer(
+      tileBuilder: (context, child, tile) {
+        // 오류 난 조각도 끝난 것으로 본다(영영 기다리지 않게)
+        if (_ready.mark(frame, tile.coordinates, tile.loadFinishedAt != null) && !_refresh) {
+          _refresh = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _refresh = false;
+            if (mounted) setState(() {});
+          });
+        }
+        return child;
+      },
       key: ValueKey('${_sel.kind}|$wms|$url|$t'),
       urlTemplate: wms == null ? url : null,
       wmsOptions: wms == null

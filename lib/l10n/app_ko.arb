@@ -113,6 +113,7 @@
  "rainCount": "{wet}곳",
  "noneShort": "없음",
  "popLabel": "강수확률",
+ "satLoading": "위성 사진 받는 중",
  "notifOff": "휴대폰에서 이 앱 알림이 꺼져 있어서 알림이 오지 않아요.",
  "notifTurnOn": "알림 켜기",
  "colTemp": "기온",

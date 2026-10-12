@@ -1,3 +1,7 @@
+import 'dart:math';
+
+import 'package:http/http.dart' as http;
+
 import '../fetcher.dart';
 import '../keys.dart';
 import '../models.dart';
@@ -77,6 +81,28 @@ List<DateTime> satFrames(DateTime nowUtc, {int count = 12, Duration lag = const 
   final latest = DateTime.utc(nowUtc.year, nowUtc.month, nowUtc.day, nowUtc.hour, nowUtc.minute ~/ 10 * 10)
       .subtract(lag);
   return [for (var i = count - 1; i >= 0; i--) latest.subtract(Duration(minutes: 10 * i))];
+}
+
+/// GIBS 에 실제로 올라온 가장 최근 사진 시각. 지금부터 10분씩 거슬러 가며 그 장소 위 조각
+/// (3단계, 한 장)을 달라고 해 보고 처음 있는 시각을 돌려준다. 3시간 안에 없으면 null.
+/// 늦게 올라오는 정도가 그때그때 달라서(25분~1시간 반) 고정값으로 빼면 최근 사진을 버리게 된다.
+Future<DateTime?> latestPublished(http.Client c, SatLayer l, DateTime nowUtc, Place p) async {
+  const z = 3;
+  final n = 1 << z;
+  final x = ((p.lon + 180) / 360 * n).floor();
+  final lat = p.lat * pi / 180;
+  final y = ((1 - log(tan(lat) + 1 / cos(lat)) / pi) / 2 * n).floor();
+  var t = DateTime.utc(nowUtc.year, nowUtc.month, nowUtc.day, nowUtc.hour, nowUtc.minute ~/ 10 * 10);
+  for (var i = 0; i < 18; i++, t = t.subtract(const Duration(minutes: 10))) {
+    final url = l.urlAt(t).replaceFirst('{z}', '$z').replaceFirst('{y}', '$y').replaceFirst('{x}', '$x');
+    try {
+      final r = await c.get(Uri.parse(url)).timeout(const Duration(seconds: 8));
+      if (r.statusCode == 200) return t;
+    } catch (_) {
+      return null; // 연결이 안 되면 더 물어봐도 소용없다
+    }
+  }
+  return null;
 }
 
 String _two(int v) => v.toString().padLeft(2, '0');
