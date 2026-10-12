@@ -47,7 +47,9 @@ SatLayer _eumetsat(SatKind k, String layer) => SatLayer(k, '',
 String owmTileUrl(String layer) => 'https://tile.openweathermap.org/map/$layer/{z}/{x}/{y}.png?appid=${Keys.owm}';
 
 /// 장소 경도에 맞는 정지위성을 고른다. 유럽·아프리카(−30°~60°)는 NASA GIBS 에 정지위성이 없어 EUMETSAT Meteosat.
-List<SatLayer> satLayersFor(Place p) {
+/// 한국은 천리안(기상청이 몇 분 만에 올림)이 가장 최근 사진이라 키가 있으면 맨 앞에 둔다.
+List<SatLayer> satLayersFor(Place p, {bool? kmaFirst}) {
+  final kma = p.country == 'KR' && (kmaFirst ?? Keys.dataGoKr.isNotEmpty);
   final sat = p.lon < -105
       ? 'GOES-West'
       : p.lon < -30
@@ -56,6 +58,7 @@ List<SatLayer> satLayersFor(Place p) {
               ? 'Himawari'
               : null;
   return [
+    if (kma) const SatLayer(SatKind.kma, ''),
     if (sat == null) ...[
       _eumetsat(SatKind.infrared, 'mtg_fd:ir105_hrfi'),
       _eumetsat(SatKind.visible, 'mtg_fd:rgb_truecolour'),
@@ -69,7 +72,7 @@ List<SatLayer> satLayersFor(Place p) {
     _gibsLayer(SatKind.trueColor, 'VIIRS_SNPP_CorrectedReflectance_TrueColor', 9, ext: 'jpg'),
     SatLayer(SatKind.owmClouds, owmTileUrl('clouds_new')),
     SatLayer(SatKind.owmPrecip, owmTileUrl('precipitation_new')),
-    if (p.country == 'KR') const SatLayer(SatKind.kma, ''),
+    if (p.country == 'KR' && !kma) const SatLayer(SatKind.kma, ''),
   ];
 }
 

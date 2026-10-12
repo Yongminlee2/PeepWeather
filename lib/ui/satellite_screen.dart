@@ -77,16 +77,41 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
     return t != null ? satFrames(t, lag: Duration.zero) : satFrames(_now, lag: _sel.lag);
   }
 
+  Timer? _newer;
+
   @override
   void initState() {
     super.initState();
     _select(_sel);
+    // 화면을 열어 둔 동안 새 사진이 올라오면 이어 붙인다
+    _newer = Timer.periodic(const Duration(minutes: 5), (_) => _checkNewer());
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _newer?.cancel();
     super.dispose();
+  }
+
+  /// 새로 올라온 사진이 있나 다시 확인. 있으면 가장 최근 장면으로 옮겨 보여준다.
+  Future<void> _checkNewer() async {
+    final layer = _sel;
+    if (layer.kind == SatKind.kma) {
+      final fs = await kmaSatFrames(widget.fetcher.forced(const Duration(minutes: 4))).catchError((_) => _kmaFrames);
+      if (!mounted || fs.isEmpty || fs.last.$1 == _kmaFrames.lastOrNull?.$1) return;
+      setState(() {
+        _kmaFrames = fs;
+        if (_sel.kind == SatKind.kma) _frame = fs.length - 1;
+      });
+    } else if (_askLatest && _latest[layer.kind] != null) {
+      final t = await latestPublished(widget.fetcher.client, layer, _now, widget.place);
+      if (!mounted || t == null || !t.isAfter(_latest[layer.kind]!)) return;
+      setState(() {
+        _latest[layer.kind] = t;
+        if (_sel.kind == layer.kind) _frame = _times.length - 1;
+      });
+    }
   }
 
   void _select(SatLayer layer) {

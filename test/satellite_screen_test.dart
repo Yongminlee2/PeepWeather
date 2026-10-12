@@ -81,6 +81,31 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('while open it checks for newer pictures every 5 minutes', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    var newest = DateTime.utc(2026, 10, 11, 2, 40);
+    final net = MockClient((r) async {
+      final t = RegExp(r'/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})Z/').firstMatch(r.url.path)!;
+      return http.Response('', DateTime.parse('${t[1]}Z').isAfter(newest) ? 404 : 200);
+    });
+    await tester.pumpWidget(WeatherApp(
+        locale: const Locale('ko'),
+        home: SatelliteScreen(place: seoul, fetcher: Fetcher(net, dir), offset: const Duration(hours: 9), now: now)));
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 10));
+    }
+    expect(find.text('10/11 11:40'), findsOneWidget);
+    newest = DateTime.utc(2026, 10, 11, 2, 50); // 새 사진이 올라왔다
+    await tester.pump(const Duration(minutes: 5));
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 10));
+    }
+    expect(find.text('10/11 11:50'), findsOneWidget);
+    await close(tester);
+  });
+
   group('frame readiness', () {
     test('a frame is ready when every tile it showed has loaded', () {
       final r = FrameReadiness();

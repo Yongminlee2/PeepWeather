@@ -97,4 +97,11 @@ void main() {
       expect(f, [DateTime.utc(2026, 10, 12, 11, 20), DateTime.utc(2026, 10, 12, 11, 30)]);
     });
   });
+
+  test('in Korea the KMA image (newest, a few minutes old) comes first when its key is set', () {
+    const p = Place('서울', 'KR', 37.57, 126.98);
+    expect(satLayersFor(p, kmaFirst: true).first.kind, SatKind.kma);
+    expect(satLayersFor(p, kmaFirst: true).length, 6);
+    expect(satLayersFor(const Place('Paris', 'FR', 48.85, 2.35), kmaFirst: true).first.kind, SatKind.infrared);
+  });
 }
