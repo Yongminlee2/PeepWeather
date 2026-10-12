@@ -104,4 +104,10 @@ void main() {
     expect(satLayersFor(p, kmaFirst: true).length, 6);
     expect(satLayersFor(const Place('Paris', 'FR', 48.85, 2.35), kmaFirst: true).first.kind, SatKind.infrared);
   });
+
+  test('KMA image lists are filed by UTC date: ask today and yesterday in UTC', () {
+    // 한국 0시 5분 = UTC 전날 15시 5분 — 한국 날짜(13일)로 물으면 목록이 비어 "못 가져옴"이 됐다
+    expect(kmaListDays(DateTime.utc(2026, 10, 12, 15, 5)), ['20261012', '20261011']);
+    expect(kmaListDays(DateTime.utc(2026, 10, 13, 0, 3)), ['20261013', '20261012']);
+  });
 }

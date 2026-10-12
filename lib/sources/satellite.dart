@@ -147,23 +147,36 @@ Uri parseKmaSat(String body) {
   return Uri.parse(urls.last.replaceFirst('.thn.png', '.srv.png')).replace(scheme: 'https');
 }
 
+/// 천리안 사진 목록은 UTC 날짜로 묶여 있다(한국 날짜로 물으면 0~9시엔 비어 있음).
+/// UTC 날이 막 바뀌었을 때도 3시간치가 차도록 전날 목록도 함께 받는다.
+List<String> kmaListDays(DateTime nowUtc) => [ymd(nowUtc), ymd(nowUtc.subtract(const Duration(days: 1)))];
+
 Future<List<(DateTime, Uri)>> kmaSatFrames(Fetcher f) async {
   requireKey(Keys.dataGoKr);
-  final kst = DateTime.now().toUtc().add(const Duration(hours: 9));
-  final r = await f.get(
-      Uri.https('apis.data.go.kr', '/1360000/SatlitImgInfoService/getInsightSatlit', {
-        'serviceKey': Keys.dataGoKr,
-        'pageNo': '1',
-        'numOfRows': '10',
-        'dataType': 'JSON',
-        'sat': 'G2',
-        'data': 'ir105',
-        'area': 'ko',
-        'time': ymd(kst),
-      }),
-      maxAge: const Duration(minutes: 10),
-      check: checkDataGoKr);
-  final frames = parseKmaSatFrames(r.body);
+  final bodies = <String>[];
+  Object? err;
+  for (final day in kmaListDays(DateTime.now().toUtc())) {
+    try {
+      final r = await f.get(
+          Uri.https('apis.data.go.kr', '/1360000/SatlitImgInfoService/getInsightSatlit', {
+            'serviceKey': Keys.dataGoKr,
+            'pageNo': '1',
+            'numOfRows': '10',
+            'dataType': 'JSON',
+            'sat': 'G2',
+            'data': 'ir105',
+            'area': 'ko',
+            'time': day,
+          }),
+          maxAge: const Duration(minutes: 10),
+          check: checkDataGoKr);
+      bodies.add(r.body);
+    } catch (e) {
+      err ??= e; // 하루치가 실패해도 다른 날 것으로 보여 준다
+    }
+  }
+  if (bodies.isEmpty) throw err!;
+  final frames = parseKmaSatFrames(bodies.join('\n'));
   if (frames.isEmpty) throw const FormatException('no image');
   return frames;
 }
