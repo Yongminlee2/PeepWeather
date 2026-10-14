@@ -27,15 +27,20 @@ Future<Directory> ledgerDirectory() async => Directory('${(await getApplicationS
 
 final notifications = FlutterLocalNotificationsPlugin();
 
+// 아이폰은 초기화만으로 권한 창이 뜨지 않게 한다 — 묻는 것은 위치 창 뒤 askNotificationPermission 한 곳.
 Future<void> initNotifications() => notifications.initialize(
     settings: const InitializationSettings(
-        android: AndroidInitializationSettings('ic_stat_weather'), iOS: DarwinInitializationSettings()));
+        android: AndroidInitializationSettings('ic_stat_weather'),
+        iOS: DarwinInitializationSettings(
+            requestAlertPermission: false, requestBadgePermission: false, requestSoundPermission: false)));
 
-/// 앱 시작 때: 2시간마다 확인 등록.
+/// 앱 시작 때: 2시간마다 확인 등록. 아이폰은 frequency 를 안 보고 initialDelay 를
+/// 「이때부터 해도 된다」로 쓰며, 실제 시점은 iOS 가 정한다(ios/Runner/AppDelegate.swift).
 Future<void> scheduleChecks() async {
   await Workmanager().initialize(callbackDispatcher);
   await Workmanager().registerPeriodicTask(checkTask, checkTask,
       frequency: const Duration(hours: 2),
+      initialDelay: Platform.isIOS ? const Duration(hours: 2) : null,
       existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
       constraints: Constraints(networkType: NetworkType.connected));
 }
@@ -53,6 +58,8 @@ Future<void> askNotificationPermission() async {
 
 Future<bool> notificationsEnabled() async {
   await initNotifications();
+  final ios = notifications.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+  if (ios != null) return (await ios.checkPermissions())?.isEnabled ?? true;
   return await notifications
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.areNotificationsEnabled() ??

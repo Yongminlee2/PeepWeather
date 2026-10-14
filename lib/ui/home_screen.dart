@@ -7,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../models.dart';
 import 'report_view.dart';
 import 'quick_cities.dart';
+import 'debug_shot.dart';
 import 'search_screen.dart';
 import 'theme.dart';
 import 'settings_screen.dart';
@@ -52,8 +53,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     st.locate(lang, l.currentLocation).then((_) {
       widget.afterLocate?.call();
       _load(0);
+      if (debugShot.isNotEmpty) _openShot();
     });
   }
+
+  /// 시뮬레이터 화면 확인: SHOT 이 가리키는 화면을 연다(debug_shot.dart).
+  void _openShot() {
+    if (!mounted) return;
+    switch (debugShot) {
+      case 'settings':
+        _openSettings();
+      case 'search':
+        _search();
+      case 'satellite':
+        if (st.places.isNotEmpty) widget.onSatellite?.call(context, st.places.first);
+    }
+  }
+
+  void _openSettings() => Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => SettingsScreen(
+          settings: st.settings, notificationsOn: notificationsEnabled, turnOnNotifications: turnOnNotifications)));
 
   void _load(int i) {
     final ps = st.places;
@@ -108,11 +127,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               IconButton(
                   tooltip: l.settings,
                   icon: const Icon(Icons.settings),
-                  onPressed: () => Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (_) => SettingsScreen(
-                          settings: st.settings,
-                          notificationsOn: notificationsEnabled,
-                          turnOnNotifications: turnOnNotifications)))),
+                  onPressed: _openSettings),
             ],
           ),
           body: ps.isEmpty

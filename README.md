@@ -24,3 +24,26 @@ flutter run --dart-define-from-file=keys.json
 flutter build apk --release --dart-define-from-file=keys.json
 flutter test --concurrency=1
 ```
+
+## 아이폰
+
+같은 Dart 코드로 낸다. 번들 ID 는 안드로이드 패키지와 같은 `com.peep.weather`, 아이폰 전용(아이패드는 호환 모드), 최소 iOS 15.
+맥에서 Flutter 는 윈도우와 같은 3.44.9 를 쓴다(다르면 `pubspec.lock` 이 바뀐다). 플러그인은 스위프트 패키지라 CocoaPods 가 필요 없다.
+
+| 무엇 | 어디 |
+|---|---|
+| 홈 화면 위젯(작게·중간) | `ios/CompareWidget/` — 앱이 `home_widget` 으로 앱 그룹 `group.com.peep.weather` 에 넣은 값을 그린다 |
+| 2시간마다 확인(알림·위젯 갱신) | `workmanager` 의 `BGAppRefreshTask`. 이름 `weather-check` 를 `Info.plist`·`AppDelegate.swift`·`lib/background.dart` 에 같게. 실제 시점은 iOS 가 정한다 |
+| 알림 권한 | 위치 창 다음에 한 번 묻는다(`askNotificationPermission`). 초기화만으로는 묻지 않게 해 두었다 |
+| 홈 화면 이름·위치 문구 | `ios/Runner/{ko,en}.lproj/InfoPlist.strings` |
+| 개인정보 매니페스트 | `ios/Runner/PrivacyInfo.xcprivacy`(대략적 위치 → 앱 기능), `ios/CompareWidget/PrivacyInfo.xcprivacy` |
+| 설정이 안드로이드와 맞는지 | `test/ios_config_test.dart` (윈도우에서도 돈다) |
+
+```
+flutter build ios --simulator --debug --dart-define-from-file=keys.json
+python3 tool/ios_shots.py <저장 폴더> <시뮬레이터 UDID> home settings satellite@20   # 화면 확인·스크린샷
+flutter build ipa --release --dart-define-from-file=keys.json                         # 앱스토어 업로드용
+```
+
+시뮬레이터는 탭이 앱에 안 닿아서 디버그 빌드의 `SHOT` 값으로 열 화면을 정한다(`lib/ui/debug_shot.dart`, 정식 빌드에선 빠진다).
+위젯·백그라운드 확인·알림이 실제로 뜨는지는 실기기로 봐야 한다. 앱스토어 입력 내용은 `store/앱스토어-작성내용.md`.

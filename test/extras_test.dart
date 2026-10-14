@@ -5,6 +5,7 @@ import 'package:weather_compare/l10n/app_localizations.dart';
 import 'package:weather_compare/models.dart';
 import 'package:weather_compare/more_games.dart';
 import 'package:weather_compare/repository.dart';
+import 'package:weather_compare/ui/more_games_screen.dart';
 
 void main() {
   final l = lookupAppLocalizations(const Locale('ko'));
@@ -52,5 +53,33 @@ void main() {
     expect(mid, '22°'); // 20,21,22,23,24 의 가운데
     expect(range, '5곳 20° ~ 24°');
     expect(widgetHeadline(report(0), false, l), isNull);
+  });
+
+  group('more games on iPhone', () {
+    const json = '''{"apps":[
+      {"id":"com.peep.weather","name":"날씨 비교"},
+      {"id":"com.peep.science","name":"삐약과학","ios":"6821341160"},
+      {"id":"com.peep.math","name":"삐약수학"}]}''';
+
+    test('only this app and App Store games are listed, opened by App Store number', () {
+      final v = MoreGames.visible(MoreGames.parse(json), ios: true);
+      expect(v.map((g) => g.id), ['com.peep.weather', 'com.peep.science']);
+      expect(MoreGames.storeKey(v[1], ios: true), '6821341160');
+      expect(MoreGames.visible(MoreGames.parse(json), ios: false), hasLength(3));
+    });
+
+    Future<List<bool>> answers(String? cached, String? fresh, {bool ios = true}) async {
+      final out = <bool>[];
+      await moreGamesAvailable(out.add, ios: ios, cached: () async => cached, refresh: () async => fresh);
+      return out;
+    }
+
+    test('settings row: hidden without App Store games, shown once one appears', () async {
+      const none = '{"apps":[{"id":"com.peep.weather","name":"날씨 비교"},{"id":"com.peep.math","name":"삐약수학"}]}';
+      expect(await answers(null, null), isEmpty); // 목록이 없으면 숨긴 채
+      expect(await answers(none, null), [false]);
+      expect(await answers(none, json), [false, true]);
+      expect(await answers(null, null, ios: false), [true]); // 안드로이드는 늘 보인다
+    });
   });
 }

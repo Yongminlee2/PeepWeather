@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
+import '../more_games.dart';
 import '../settings.dart';
 import 'format.dart';
 import 'more_games_screen.dart';
@@ -21,12 +22,16 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notifOn = true;
+  bool _moreGames = !MoreGames.onIos; // 아이폰은 받을 게임이 있을 때만(moreGamesAvailable)
   late final AppLifecycleListener _life;
 
   @override
   void initState() {
     super.initState();
     _check();
+    moreGamesAvailable((v) {
+      if (mounted && v != _moreGames) setState(() => _moreGames = v);
+    });
     _life = AppLifecycleListener(onResume: _check); // 휴대폰 설정에서 켜고 돌아오면 다시 확인
   }
 
@@ -122,10 +127,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
-              ListTile(
-                  leading: Icon(Icons.apps, color: w.muted),
-                  title: Text(l.moreGames, style: TextStyle(color: w.ink)),
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MoreGamesScreen()))),
+              if (_moreGames)
+                ListTile(
+                    leading: Icon(Icons.apps, color: w.muted),
+                    title: Text(l.moreGames, style: TextStyle(color: w.ink)),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MoreGamesScreen()))),
               ListTile(
                   leading: Icon(Icons.privacy_tip_outlined, color: w.muted),
                   title: Text(l.privacy, style: TextStyle(color: w.ink)),

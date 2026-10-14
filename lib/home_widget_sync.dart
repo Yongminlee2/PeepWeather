@@ -24,9 +24,14 @@ List<String> widgetRows(Report r, bool fahrenheit, AppLocalizations l) => [
   );
 }
 
-/// 안드로이드 홈 화면 위젯(CompareWidget)에 넣고 다시 그리게 한다. 실패해도 앱은 그대로.
+/// 아이폰 위젯(ios/CompareWidget)과 값을 나눠 쓰는 앱 그룹. 두 entitlements 와 같아야 한다.
+const appGroup = 'group.com.peep.weather';
+
+/// 홈 화면 위젯(안드로이드·아이폰 CompareWidget)에 넣고 다시 그리게 한다. 실패해도 앱은 그대로.
 Future<void> syncWidget(Report r, bool fahrenheit, AppLocalizations l) async {
   try {
+    await HomeWidget.setAppGroupId(appGroup); // 아이폰만 쓴다. 백그라운드 엔진에서도 불리니 매번
+
     final rows = widgetRows(r, fahrenheit, l);
     final head = widgetHeadline(r, fahrenheit, l);
     await HomeWidget.saveWidgetData<String>('mid', head?.$1 ?? '—');
@@ -37,7 +42,7 @@ Future<void> syncWidget(Report r, bool fahrenheit, AppLocalizations l) async {
     for (var i = 0; i < 4; i++) {
       await HomeWidget.saveWidgetData<String>('row$i', i < rows.length ? rows[i] : '');
     }
-    await HomeWidget.updateWidget(androidName: 'CompareWidget');
+    await HomeWidget.updateWidget(androidName: 'CompareWidget', iOSName: 'CompareWidget');
   } catch (_) {}
 }
 

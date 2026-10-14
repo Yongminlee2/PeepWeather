@@ -6,6 +6,7 @@ import 'background.dart';
 import 'home_widget_sync.dart';
 import 'l10n/app_localizations.dart';
 import 'settings.dart';
+import 'ui/debug_shot.dart';
 import 'ui/home_screen.dart';
 import 'ui/satellite_screen.dart';
 import 'ui/theme.dart';
@@ -19,7 +20,8 @@ Future<void> main() async {
   runApp(WeatherApp(
       home: HomeScreen(
           state: state,
-          afterLocate: () => askNotificationPermission().ignore(),
+          // 화면 확인(SHOT) 때는 알림 권한 창을 띄우지 않는다 — 시뮬레이터에선 닫을 손이 없다
+          afterLocate: debugShot.isEmpty ? () => askNotificationPermission().ignore() : null,
           onSatellite: (context, p) => Navigator.of(context)
               .push(MaterialPageRoute(builder: (_) => SatelliteScreen(place: p, fetcher: state.fetcher, offset: state.reportFor(p)?.offset))))));
 }
