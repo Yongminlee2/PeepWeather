@@ -240,7 +240,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get moreGames => 'More games by the developer';
+  String get moreGames => 'More apps by the developer';
 
   @override
   String get moreLoading => 'Loading…';
@@ -297,7 +297,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get srcOmCams => 'CAMS (Copernicus)';
 
   @override
-  String get satDaily => 'One image a day (today)';
+  String get satDaily => 'One image a day';
+
+  @override
+  String satDailyOn(String date) {
+    return 'Daytime pass, $date';
+  }
 
   @override
   String get satModel => 'Map computed by a forecast model';
@@ -376,7 +381,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get noneShort => 'none';
+  String get noneShort => '0';
 
   @override
   String get popLabel => 'Chance of rain';

@@ -1,5 +1,5 @@
 // 화면 그림 뽑기(에뮬레이터 대신). 평소엔 건너뛰고, SHOT_DIR 을 주면 실제 글꼴·아이콘으로 PNG 를 그린다.
-//   SHOT_DIR=C:/tmp/shots flutter test test/screenshots_test.dart
+//   SHOT_DIR=C:/tmp/shots flutter test test/screenshots_test.dart   (SHOT_LOCALE=en 이면 영어)
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -23,6 +23,7 @@ import 'package:weather_compare/verify.dart';
 import 'repository_test.dart' show fakeNet;
 
 final dir = Platform.environment['SHOT_DIR'];
+final lang = Platform.environment['SHOT_LOCALE'] ?? 'ko'; // en 이면 영어 화면
 
 Future<void> _font(String family, List<String> paths) async {
   final l = FontLoader(family);
@@ -53,7 +54,7 @@ Future<void> shot(WidgetTester tester, String name, Widget home, {bool dark = fa
           disableAnimations: true,
           padding: const EdgeInsets.only(top: 32),
           platformBrightness: dark ? Brightness.dark : Brightness.light),
-      child: WeatherApp(locale: const Locale('ko'), home: home),
+      child: WeatherApp(locale: Locale(lang), home: home),
     ),
   ));
   await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 400))); // 로티 파일

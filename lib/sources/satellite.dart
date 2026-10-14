@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -69,11 +70,68 @@ List<SatLayer> satLayersFor(Place p, {bool? kmaFirst}) {
       _gibsLayer(SatKind.visible, sat == 'Himawari' ? 'Himawari_AHI_Band3_Red_Visible_1km' : '${sat}_ABI_GeoColor', 7,
           animated: true),
     ],
-    _gibsLayer(SatKind.trueColor, 'VIIRS_SNPP_CorrectedReflectance_TrueColor', 9, ext: 'jpg'),
+    dailyTrueColor(dailyTrueColorIds.first), // 실제로 볼 위성·날짜는 화면이 latestDaily 로 고른다
     SatLayer(SatKind.owmClouds, owmTileUrl('clouds_new')),
     SatLayer(SatKind.owmPrecip, owmTileUrl('precipitation_new')),
     if (p.country == 'KR' && !kma) const SatLayer(SatKind.kma, ''),
   ];
+}
+
+/// 하루 한 장 실사(극궤도 위성) 후보 — 오후에 지나는 위성(더 최근 사진)부터.
+/// Suomi NPP(VIIRS_SNPP)는 2026-10 기준 어느 날짜든 새까만 조각만 준다 — 그래서 이 화면이 늘 검었다. 뺐다.
+const dailyTrueColorIds = [
+  'VIIRS_NOAA20_CorrectedReflectance_TrueColor',
+  'VIIRS_NOAA21_CorrectedReflectance_TrueColor',
+  'MODIS_Aqua_CorrectedReflectance_TrueColor',
+  'MODIS_Terra_CorrectedReflectance_TrueColor',
+];
+
+SatLayer dailyTrueColor(String id) => _gibsLayer(SatKind.trueColor, id, 9, ext: 'jpg');
+
+/// 위성 이름(출처 줄에 붙인다).
+String dailySatName(SatLayer l) => l.tileUrl.contains('NOAA20')
+    ? 'NOAA-20 VIIRS'
+    : l.tileUrl.contains('NOAA21')
+        ? 'NOAA-21 VIIRS'
+        : l.tileUrl.contains('Aqua')
+            ? 'Aqua MODIS'
+            : 'Terra MODIS';
+
+/// 장소 위 지도 조각 번호(웹 메르카토르).
+(int, int) _tileXY(Place p, int z) {
+  final n = 1 << z;
+  final lat = p.lat * pi / 180;
+  return (((p.lon + 180) / 360 * n).floor(), ((1 - log(tan(lat) + 1 / cos(lat)) / pi) / 2 * n).floor());
+}
+
+/// 그 장소 위에 실제로 찍힌 가장 최근 하루 사진(위성, 날짜). 장소 날짜로 오늘 → 어제 → 그제.
+/// GIBS 는 아직 처리 안 된 곳·꺼진 위성도 200 으로 새까만 조각을 주므로, 장소 위 조각(5단계) 하나를 받아
+/// [blackShare](검은 칸 비율, 화면이 그림을 풀어서 잰다)가 작은 것만 고른다. 모두 비었으면 null.
+Future<(SatLayer, DateTime)?> latestDaily(http.Client c, Place p, DateTime nowUtc, Duration offset,
+    Future<double> Function(Uint8List jpg) blackShare) async {
+  const z = 5;
+  final (x, y) = _tileXY(p, z);
+  final local = nowUtc.add(offset);
+  for (var back = 0; back < 3; back++) {
+    final day = DateTime.utc(local.year, local.month, local.day).subtract(Duration(days: back));
+    final layers = [for (final id in dailyTrueColorIds) dailyTrueColor(id)];
+    final ok = await Future.wait([
+      for (final l in layers)
+        () async {
+          try {
+            final url = l.urlAt(day).replaceFirst('{z}', '$z').replaceFirst('{y}', '$y').replaceFirst('{x}', '$x');
+            final r = await c.get(Uri.parse(url)).timeout(const Duration(seconds: 8));
+            return r.statusCode == 200 && await blackShare(r.bodyBytes) < 0.2;
+          } catch (_) {
+            return false;
+          }
+        }(),
+    ]);
+    for (var i = 0; i < layers.length; i++) {
+      if (ok[i]) return (layers[i], day);
+    }
+  }
+  return null;
 }
 
 /// 애니메이션 프레임 시각(10분 간격, 오래된 것 먼저). 기본 12장 = 2시간 반복
@@ -91,10 +149,7 @@ List<DateTime> satFrames(DateTime nowUtc, {int count = 12, Duration lag = const 
 /// 늦게 올라오는 정도가 그때그때 달라서(25분~1시간 반) 고정값으로 빼면 최근 사진을 버리게 된다.
 Future<DateTime?> latestPublished(http.Client c, SatLayer l, DateTime nowUtc, Place p) async {
   const z = 3;
-  final n = 1 << z;
-  final x = ((p.lon + 180) / 360 * n).floor();
-  final lat = p.lat * pi / 180;
-  final y = ((1 - log(tan(lat) + 1 / cos(lat)) / pi) / 2 * n).floor();
+  final (x, y) = _tileXY(p, z);
   var t = DateTime.utc(nowUtc.year, nowUtc.month, nowUtc.day, nowUtc.hour, nowUtc.minute ~/ 10 * 10);
   for (var i = 0; i < 18; i++, t = t.subtract(const Duration(minutes: 10))) {
     final url = l.urlAt(t).replaceFirst('{z}', '$z').replaceFirst('{y}', '$y').replaceFirst('{x}', '$x');

@@ -667,7 +667,11 @@ class _Air extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('$name (${l.pmUnit})', style: TextStyle(fontSize: 13, color: w.muted)),
           const SizedBox(height: 4),
-          SizedBox(height: 22, child: CustomPaint(size: Size.infinite, painter: _GradeScale(pts, cuts, cap, w))),
+          SizedBox(
+              height: 38,
+              child: CustomPaint(
+                  size: Size.infinite,
+                  painter: _GradeScale(pts, cuts, cap, w, [for (final g in Grade.values) gradeText(l, g)]))),
         ]),
       );
     }
@@ -726,19 +730,28 @@ class _Air extends StatelessWidget {
 }
 
 class _GradeScale extends CustomPainter {
-  _GradeScale(this.points, this.cuts, this.cap, this.w);
+  _GradeScale(this.points, this.cuts, this.cap, this.w, this.labels);
   final List<(double, bool)> points;
   final List<double> cuts;
   final double cap;
   final Wx w;
+  final List<String> labels; // 칸마다 등급 이름(좋음·보통·나쁨·매우나쁨) — 색만으로는 뜻을 모른다
   @override
   void paint(Canvas c, Size s) {
     double x(double v) => 6 + math.min(v, cap) / cap * (s.width - 12);
-    final y = s.height / 2;
+    const y = 11.0;
     final edges = [0.0, ...cuts, cap];
     for (var i = 0; i < 4; i++) {
       c.drawRect(Rect.fromLTRB(x(edges[i]), y - 3, x(edges[i + 1]), y + 3),
           Paint()..color = gradeColor(Grade.values[i]).withValues(alpha: 0.45));
+      final tp = TextPainter(
+          text: TextSpan(text: labels[i], style: TextStyle(fontSize: 10, color: w.muted, fontFamily: 'Plex')),
+          textDirection: TextDirection.ltr,
+          maxLines: 1)
+        ..layout();
+      final mid = (x(edges[i]) + x(edges[i + 1])) / 2;
+      final left = (mid - tp.width / 2).clamp(0.0, s.width - tp.width);
+      tp.paint(c, Offset(left, y + 10));
     }
     for (final (v, measured) in points) {
       final o = Offset(x(v), y);
@@ -841,7 +854,7 @@ class _Verdict extends StatelessWidget {
       ),
       if (n > 0)
         (
-          Icons.umbrella,
+          Icons.water_drop,
           v.rain == RainCall.split ? w.disagree : w.rain,
           switch (v.rain) {
             RainCall.likely => l.vRainLikely,

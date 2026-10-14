@@ -110,4 +110,38 @@ void main() {
     expect(kmaListDays(DateTime.utc(2026, 10, 12, 15, 5)), ['20261012', '20261011']);
     expect(kmaListDays(DateTime.utc(2026, 10, 13, 0, 3)), ['20261013', '20261012']);
   });
+
+  group('daily true-colour pick', () {
+    const seoul = Place('서울', 'KR', 37.57, 126.98);
+    // 16시(한국) — 오후 위성 사진은 아직 처리 전이라 검은 조각, 아침 Terra 는 있음
+    final now = DateTime.utc(2026, 10, 14, 7, 20);
+    Future<(SatLayer, DateTime)?> pick(Set<String> filled) => latestDaily(
+          MockClient((r) async {
+            final hit = filled.any((f) => r.url.path.contains(f));
+            return http.Response.bytes(hit ? [1] : [0], 200); // 바이트 1 = 찍힌 사진, 0 = 검은 조각(시험용 약속)
+          }),
+          seoul,
+          now,
+          const Duration(hours: 9),
+          (b) async => b.first == 1 ? 0.02 : 1.0,
+        );
+
+    test('prefers the newest filled image today, in satellite order', () async {
+      final r = await pick({'MODIS_Terra_CorrectedReflectance_TrueColor/default/2026-10-14'});
+      expect(r!.$1.tileUrl, contains('MODIS_Terra'));
+      expect(r.$2, DateTime.utc(2026, 10, 14));
+      final both = await pick({'MODIS_Terra_CorrectedReflectance_TrueColor/default/2026-10-14', 'VIIRS_NOAA20_CorrectedReflectance_TrueColor/default/2026-10-14'});
+      expect(both!.$1.tileUrl, contains('NOAA20')); // 오후에 지나는 위성이 더 최근
+    });
+
+    test('falls back to yesterday, then null when nothing is filled', () async {
+      final r = await pick({'VIIRS_NOAA20_CorrectedReflectance_TrueColor/default/2026-10-13'});
+      expect(r!.$2, DateTime.utc(2026, 10, 13));
+      expect(await pick({}), isNull);
+    });
+
+    test('never asks Suomi NPP (only black tiles since 2026-10)', () {
+      expect(dailyTrueColorIds.any((id) => id.contains('SNPP')), isFalse);
+    });
+  });
 }

@@ -521,7 +521,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreGames.
   ///
   /// In en, this message translates to:
-  /// **'More games by the developer'**
+  /// **'More apps by the developer'**
   String get moreGames;
 
   /// No description provided for @moreLoading.
@@ -635,8 +635,14 @@ abstract class AppLocalizations {
   /// No description provided for @satDaily.
   ///
   /// In en, this message translates to:
-  /// **'One image a day (today)'**
+  /// **'One image a day'**
   String get satDaily;
+
+  /// No description provided for @satDailyOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Daytime pass, {date}'**
+  String satDailyOn(String date);
 
   /// No description provided for @satModel.
   ///
@@ -767,7 +773,7 @@ abstract class AppLocalizations {
   /// No description provided for @noneShort.
   ///
   /// In en, this message translates to:
-  /// **'none'**
+  /// **'0'**
   String get noneShort;
 
   /// No description provided for @popLabel.

@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../models.dart';
 import '../repository.dart';
 import 'format.dart';
+import 'weather_icon.dart';
 
 const _labelW = 104.0, _cellW = 64.0, _rowH = 64.0, _headH = 40.0;
 
@@ -123,8 +124,11 @@ class _Grid extends StatelessWidget {
 /// 글자가 길면(예: 68°F/50°F) 줄바꿈 대신 줄여서 한 줄로.
 Widget _fit(String s, TextStyle st) => FittedBox(fit: BoxFit.scaleDown, child: Text(s, maxLines: 1, style: st));
 
-Widget _cell(Sky sky, String main, String? sub) => Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Icon(skyIcon(sky), size: 20, color: skyColor(sky)),
+// 그림은 위쪽 24시간·날짜별과 같은 하늘 판 아이콘(예전엔 머티리얼 선 아이콘이라 부분 구름이 주황 테두리 구름으로 보였다)
+Widget _cell(Sky sky, String main, String? sub, {bool night = false}) =>
+    Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      WeatherIcon(sky, night: night, size: 26, tile: true, animate: false),
+      const SizedBox(height: 2),
       _fit(main, const TextStyle(fontSize: 13)),
       if (sub != null) _fit(sub, const TextStyle(fontSize: 10, color: Colors.blueGrey)),
     ]);
@@ -152,7 +156,9 @@ class _HourTable extends StatelessWidget {
       diverging: [for (var c = 0; c < slots.length; c++) divergesHours([for (final f in r.forecasts) f.data == null ? null : at(f.data!, c)])],
       cell: (f, c) {
         final h = at(f, c);
-        return h == null ? const Center(child: Text('—')) : _cell(h.sky, tempText(h.tempC, fahrenheit), _rain(h.pop, h.mm));
+        return h == null
+            ? const Center(child: Text('—'))
+            : _cell(h.sky, tempText(h.tempC, fahrenheit), _rain(h.pop, h.mm), night: isNightAt(slots[c], r.offset));
       },
     );
   }

@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -9,6 +12,7 @@ import '../keys.dart';
 import '../l10n/app_localizations.dart';
 import '../models.dart';
 import '../sources/satellite.dart';
+import 'debug_shot.dart';
 import 'format.dart';
 
 /// 장면(프레임)마다 화면에 나온 지도 조각이 다 받아졌는지. 다 받은 장면만 재생에 쓴다.
@@ -52,7 +56,8 @@ class SatelliteScreen extends StatefulWidget {
 
 class _SatelliteScreenState extends State<SatelliteScreen> {
   late final List<SatLayer> _layers = satLayersFor(widget.place);
-  late SatLayer _sel = _layers.first;
+  // 시뮬레이터 화면 확인: SHOT=satellite:N 이면 N번째 레이어로 연다(디버그 빌드만)
+  late SatLayer _sel = _layers[(debugShotArg ?? 0).clamp(0, _layers.length - 1)];
   Future<List<(DateTime, Uri)>>? _kma;
   List<(DateTime, Uri)> _kmaFrames = const [];
   int _frame = 0;
@@ -64,7 +69,11 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
 
   /// NASA 정지위성 레이어: 몇 분 늦게 올라오는지가 그때그때 달라서 실제 최신 시각을 물어본다.
   bool get _askLatest => _sel.animated && _sel.wmsLayer == null && _sel.kind != SatKind.kma;
-  bool get _waiting => _askLatest && !_latest.containsKey(_sel.kind);
+  bool get _waiting => (_askLatest && !_latest.containsKey(_sel.kind)) || (_sel.kind == SatKind.trueColor && !_dailyDone);
+
+  /// 하루 한 장 실사: 그 장소 위에 실제로 찍힌 위성·날짜(latestDaily). 못 고르면 null 로 두고 예전처럼 default.
+  (SatLayer, DateTime)? _daily;
+  bool _dailyAsked = false, _dailyDone = false;
 
   DateTime get _now => (widget.now ?? DateTime.now()).toUtc();
   Duration get _offset => widget.offset ?? DateTime.now().timeZoneOffset;
@@ -120,6 +129,17 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
     _sel = layer;
     _ready.clear();
     _all = false;
+    if (layer.kind == SatKind.trueColor && !_dailyAsked) {
+      _dailyAsked = true;
+      latestDaily(widget.fetcher.client, widget.place, _now, _offset, jpgBlackShare).then((v) {
+        if (mounted) {
+          setState(() {
+            _daily = v;
+            _dailyDone = true;
+          });
+        }
+      });
+    }
     if (layer.kind == SatKind.kma) {
       _kma ??= kmaSatFrames(widget.fetcher).then((fs) {
         if (mounted) {
@@ -197,7 +217,9 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
     final ts = _times;
     if (ts.isNotEmpty) return frameLabel(ts[_frame.clamp(0, ts.length - 1)], _offset);
     return switch (_sel.kind) {
-      SatKind.trueColor => l.satDaily,
+      SatKind.trueColor => _daily == null
+          ? l.satDaily
+          : l.satDailyOn(localTime(_daily!.$2, Duration.zero, Localizations.localeOf(context).toString(), 'M/d')),
       SatKind.owmClouds || SatKind.owmPrecip => l.satModel,
       _ => '',
     };
@@ -211,7 +233,9 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
         ? '기상청 천리안 2A호 (공공데이터포털)'
         : owm
             ? attributions['owm']!.$1
-            : _sel.credit;
+            : _sel.kind == SatKind.trueColor && _daily != null
+                ? '${_sel.credit} (${dailySatName(_daily!.$1)})'
+                : _sel.credit;
     final ts = _times;
     final when = _when(l);
     final scheme = Theme.of(context).colorScheme;
@@ -378,7 +402,8 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
 
   Widget _tiles(DateTime? t, int frame) {
     final wms = _sel.wmsLayer;
-    final url = _sel.urlAt(t);
+    final daily = _sel.kind == SatKind.trueColor ? _daily : null;
+    final url = daily != null ? daily.$1.urlAt(daily.$2) : _sel.urlAt(t);
     return TileLayer(
       tileBuilder: (context, child, tile) {
         // 오류 난 조각도 끝난 것으로 본다(영영 기다리지 않게)
@@ -403,4 +428,19 @@ class _SatelliteScreenState extends State<SatelliteScreen> {
       tileDisplay: const TileDisplay.instantaneous(),
     );
   }
+}
+
+/// 받은 위성 조각(JPEG)에서 새까만 칸 비율. GIBS 는 아직 찍지 않은 곳을 검은색으로 채워 준다
+/// (바다 사진은 짙은 남색이라 완전한 검정과 다르다).
+Future<double> jpgBlackShare(Uint8List jpg) async {
+  final codec = await ui.instantiateImageCodec(jpg, targetWidth: 64);
+  final img = (await codec.getNextFrame()).image;
+  final px = (await img.toByteData())!;
+  img.dispose();
+  final n = px.lengthInBytes ~/ 4;
+  var black = 0;
+  for (var i = 0; i < n; i++) {
+    if (px.getUint8(i * 4) + px.getUint8(i * 4 + 1) + px.getUint8(i * 4 + 2) < 9) black++;
+  }
+  return n == 0 ? 1 : black / n;
 }

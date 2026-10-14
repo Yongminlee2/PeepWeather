@@ -67,25 +67,6 @@ const attributions = <String, (String, String)>{
 /// 출처 id → 표기 키. Open-Meteo 모델 여러 개는 표기 하나로 묶는다.
 String attributionKey(String id) => id.startsWith('om_') && id != 'om_cams' ? 'openmeteo' : id;
 
-IconData skyIcon(Sky s) => switch (s) {
-      Sky.clear => Icons.wb_sunny,
-      Sky.partly => Icons.wb_cloudy_outlined,
-      Sky.cloudy => Icons.cloud,
-      Sky.fog => Icons.foggy,
-      Sky.rain => Icons.water_drop,
-      Sky.snow => Icons.ac_unit,
-      Sky.thunder => Icons.thunderstorm,
-    };
-
-Color skyColor(Sky s) => switch (s) {
-      Sky.clear => Colors.orange,
-      Sky.partly => Colors.amber.shade700,
-      Sky.cloudy || Sky.fog => Colors.blueGrey,
-      Sky.rain => Colors.blue,
-      Sky.snow => Colors.lightBlue,
-      Sky.thunder => Colors.deepPurple,
-    };
-
 String gradeText(AppLocalizations l, Grade g) => switch (g) {
       Grade.good => l.gradeGood,
       Grade.normal => l.gradeNormal,

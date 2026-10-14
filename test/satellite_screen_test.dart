@@ -141,7 +141,7 @@ void main() {
     await pump(tester, paris);
     await tester.tap(find.text('실사(하루)'));
     await tester.pump();
-    expect(find.text('하루 한 장 촬영(오늘 낮)'), findsOneWidget);
+    expect(find.text('하루 한 장 촬영'), findsOneWidget); // 어느 위성·날짜인지 고르기 전
     await tester.tap(find.text('구름(모델)'));
     await tester.pump();
     expect(find.text('설정 필요'), findsOneWidget); // 시험 빌드엔 OWM 키가 없다

@@ -30,4 +30,12 @@ void main() {
     expect({day.first, rain.first, night.first}.length, 3);
     expect(day.length, 2);
   });
+
+  test('still frame keeps rain drops, snowflakes and the lightning bolt visible', () {
+    // 가운데 장면(0.5)은 빗줄기 하나뿐이고 번개가 없어 뇌우가 비와 같아 보였다
+    for (final s in [Sky.rain, Sky.snow, Sky.thunder]) {
+      expect(stillFrame(s), isNot(0.5), reason: '$s');
+    }
+    expect(stillFrame(Sky.clear), 0.5);
+  });
 }

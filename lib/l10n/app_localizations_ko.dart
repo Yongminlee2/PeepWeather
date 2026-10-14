@@ -239,7 +239,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get moreGames => '개발자의 다른 게임';
+  String get moreGames => '개발자의 다른 앱';
 
   @override
   String get moreLoading => '불러오는 중…';
@@ -296,7 +296,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get srcOmCams => 'CAMS(유럽 코페르니쿠스)';
 
   @override
-  String get satDaily => '하루 한 장 촬영(오늘 낮)';
+  String get satDaily => '하루 한 장 촬영';
+
+  @override
+  String satDailyOn(String date) {
+    return '$date 낮 한 장 촬영';
+  }
 
   @override
   String get satModel => '예측 모델이 계산한 지도';
@@ -374,7 +379,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get noneShort => '없음';
+  String get noneShort => '0곳';
 
   @override
   String get popLabel => '강수확률';
